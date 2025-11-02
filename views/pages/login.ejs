@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include("../partials/head"); %>
+    <title>Parent Login</title>
+  </head>
+  <body>
+    <h1>Parent Login</h1>
+    <form action="/api/parents/login" method="POST">
+      <label>Email:</label>
+      <input type="email" name="email" required />
+      <br />
+      <label>Password:</label>
+      <input type="password" name="password" required />
+      <br />
+      <button type="submit">Login</button>
+    </form>
+    <p>No account? <a href="/register">Register here</a></p>
+  </body>
+</html>

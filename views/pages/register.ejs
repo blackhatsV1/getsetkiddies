@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include("../partials/head"); %>
+    <title>Parent Register</title>
+  </head>
+  <body>
+    <h1>Register as Parent</h1>
+    <form action="/api/parents/register" method="POST">
+      <label>First Name:</label>
+      <input type="text" name="firstname" required /><br />
+      <label>Last Name:</label>
+      <input type="text" name="lastname" required /><br />
+      <label>Email:</label>
+      <input type="email" name="email" required /><br />
+      <label>Number:</label>
+      <input type="text" name="number" required /><br />
+      <label>Home Address:</label>
+      <input type="text" name="home_address" required /><br />
+      <label>Password:</label>
+      <input type="password" name="password" required /><br />
+      <button type="submit">Register</button>
+    </form>
+    <p>Already registered? <a href="/login">Login here</a></p>
+  </body>
+</html>

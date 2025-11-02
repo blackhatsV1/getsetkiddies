@@ -1,0 +1,94 @@
+<%- include('../partials/head') %>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+
+        fetch("/api/parents/current", { credentials: "include" })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.parent) {
+              const parent = data.parent;
+              document.getElementById("parent_id").value = parent.id;
+              document.getElementById("parent_email").value = parent.email;
+              document.getElementById("parent_number").value = parent.phone_number;
+              document.getElementById("parent_home_address").value = parent.home_address;
+            }
+          })
+          .catch((err) => console.error("Error fetching parent:", err));
+
+        const form = document.getElementById("childForm");
+        form.addEventListener("submit", (e) => {
+          e.preventDefault();
+
+          const formData = new FormData(form);
+          const data = Object.fromEntries(formData.entries());
+
+          fetch("/api/children/register", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          })
+            .then((res) => res.json())
+            .then((result) => {
+              if (result.message) {
+                alert("Child registered successfully!");
+                console.log("Child registered:", data);
+                form.reset();
+              } else {
+                alert("Failed to register child.");
+              }
+            })
+            .catch((err) => {
+              console.error("Error:", err);
+              alert("Error registering child.");
+            });
+        });
+      });
+    </script>
+ 
+
+
+<body>  
+  <!-- Include top navigation -->
+  <%- include('../partials/top-nav-parents') %>
+  
+  <div class="main-container">
+    <%- include('../partials/side-nav-parents') %>
+
+    <main class="content">
+      <h1>Register your Child to Get Set Kiddies</h1>
+        <div>
+            <div class="register_child">
+                <h3>Register Your Child</h3>
+
+                <form id="childForm">
+                <input type="hidden" id="parent_id" name="parent_id" />
+                <input type="hidden" id="parent_email" name="parent_email" />
+                <input type="hidden" id="parent_number" name="parent_number" />
+                <input type="hidden" id="parent_home_address" name="parent_home_address" />
+
+                <label>Child First Name:</label>
+                <input type="text" name="firstname" required /><br />
+
+                <label>Child Last Name:</label>
+                <input type="text" name="lastname" required /><br />
+
+                <label>Child Age:</label>
+                <input type="number" name="child_age" required /><br />
+
+                <label>Child Gender:</label>
+                <select name="child_gender" required>
+                    <option value="" disabled selected>Select gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select><br />
+
+                <button type="submit">Register Child</button>
+                </form>
+            </div>
+        </div>
+    </main>
+  </div>
+  <%- include('../partials/footer') %>
+</body>
+
