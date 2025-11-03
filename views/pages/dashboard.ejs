@@ -11,6 +11,44 @@
     <main class="content">
         <h1>Welcome to Getset Kiddies</h1>
         <p>This is your dashboard.</p>
+
+        <div class="dashboard-header" style="margin-top: 80px;">
+            <h2>Your Registered Kids</h2>
+            <a href="#" class="geofence-btn">Geofence Settings</a>
+        </div>
+        <% if (children && children.length > 0) { %>
+            <table class="kids-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Gender</th>
+                        <th>Date Registered</th>
+                        <th>Current Location</th>
+                        <th>Geofence Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% children.forEach(child => { %>
+                        <tr>
+                            <td><%= child.firstname %> <%= child.lastname %></td>
+                            <td><%= child.child_age %></td>
+                            <td><%= child.child_gender %></td>
+                            <td><%= new Date(child.date_registered).toLocaleDateString() %></td>
+                            <td><%= child.current_location %></td>
+                            <td><%= child.geofence_location %></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <p>No kids registered yet. <a href="/register-child">Register a child</a></p>
+        <% } %>
+
+        <div class="dashboard-actions">
+            <a href="http://localhost:3000/track-child" class="action-btn track-btn">Track Child</a>
+            <a href="http://localhost:3000/register-child" class="action-btn add-kids-btn">Add Kids</a>
+        </div>
     </main>
   </div>
   <%- include('../partials/footer') %>
