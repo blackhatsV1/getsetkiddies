@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include("../partials/head"); %>
+    <title>Parent Register</title>
+    <style>
+      body {
+        font-family: "Roboto", sans-serif;
+        background-color: #c54478;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+        flex-direction: column;
+        margin: 0;
+        overflow-y: auto; /* allow scrolling if content overflows */
+      }
+
+      .logo-container {
+        text-align: center;
+        width: 100%;
+        margin-top: 40px;
+      }
+
+      .map-pin {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        background-color: #692e69;
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
+        margin: 0 auto 15px;
+      }
+
+      .pin-center {
+        position: absolute;
+        top: 25%;
+        left: 25%;
+        width: 60px;
+        height: 60px;
+        background-color: white;
+        border-radius: 50%;
+        transform: rotate(45deg);
+      }
+
+      .logo-text {
+        font-size: 28px;
+        font-weight: bold;
+      }
+
+      .white-text {
+        color: #ffffff;
+      }
+
+      .yellow-text {
+        color: #ffff00;
+      }
+
+      .register-form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: white;
+        border-radius: 20px;
+        width: 380px;
+        padding: 40px 35px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        margin: 40px auto;
+      }
+
+      .register-form h1 {
+        color: #692e69;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .input-group {
+        position: relative;
+        width: 100%;
+        margin-bottom: 25px;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 14px 12px;
+        border: 2px solid #ccc;
+        border-radius: 10px;
+        outline: none;
+        font-size: 16px;
+        background: none;
+        box-sizing: border-box;
+      }
+
+      .input-group label {
+        position: absolute;
+        left: 14px;
+        top: 14px;
+        color: #888;
+        background: white;
+        transition: 0.3s ease;
+        padding: 0 5px;
+        pointer-events: none;
+      }
+
+      .input-group input:focus + label,
+      .input-group input:not(:placeholder-shown) + label {
+        top: -10px;
+        left: 10px;
+        font-size: 12px;
+        color: #692e69;
+      }
+
+      .error-message {
+        color: #c54478;
+        font-size: 13px;
+        margin-top: -15px;
+        margin-bottom: 10px;
+        text-align: left;
+        width: 100%;
+        display: none;
+      }
+
+      .register-form button {
+        background-color: #692e69;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 16px;
+        width: 100%;
+        transition: background-color 0.3s;
+      }
+
+      .register-form button:hover {
+        background-color: #8b3c8b;
+      }
+
+      .register-form p {
+        text-align: center;
+        margin-top: 15px;
+        color: #333;
+      }
+
+      .register-form a {
+        color: #ff9100;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      .register-form a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="logo-container">
+      <div class="map-pin">
+        <div class="pin-center"></div>
+      </div>
+      <h1 class="logo-text">
+        <span class="white-text">GetSet</span>
+        <span class="yellow-text">Kiddies</span>
+      </h1>
+    </div>
+
+    <form
+      action="/api/parents/register"
+      method="POST"
+      class="register-form"
+      id="registerForm"
+      onsubmit="return validatePasswords(event)"
+    >
+      <h1>Parent Registration</h1>
+
+      <div class="input-group">
+        <input type="text" name="firstname" id="firstname" placeholder=" " required />
+        <label for="firstname">First Name</label>
+      </div>
+
+      <div class="input-group">
+        <input type="text" name="lastname" id="lastname" placeholder=" " required />
+        <label for="lastname">Last Name</label>
+      </div>
+
+      <div class="input-group">
+        <input type="email" name="email" id="email" placeholder=" " required />
+        <label for="email">Email</label>
+      </div>
+
+      <div class="input-group">
+        <input type="text" name="number" id="number" placeholder=" " required />
+        <label for="number">Number</label>
+      </div>
+
+      <div class="input-group">
+        <input type="text" name="home_address" id="home_address" placeholder=" " required />
+        <label for="home_address">Home Address</label>
+      </div>
+
+      <div class="input-group">
+        <input type="password" name="password" id="password" placeholder=" " required />
+        <label for="password">Password</label>
+      </div>
+
+      <div class="input-group">
+        <input type="password" name="confirm_password" id="confirm_password" placeholder=" " required />
+        <label for="confirm_password">Confirm Password</label>
+      </div>
+
+      <div class="error-message" id="error-message">Passwords do not match.</div>
+
+      <button type="submit">Register</button>
+      <p>Already registered? <a href="/login">Login here</a></p>
+    </form>
+
+    <script>
+      function validatePasswords(event) {
+        const password = document.getElementById("password").value.trim();
+        const confirmPassword = document.getElementById("confirm_password").value.trim();
+        const errorMessage = document.getElementById("error-message");
+
+        if (password !== confirmPassword) {
+          errorMessage.style.display = "block";
+          event.preventDefault();
+          return false;
+        } else {
+          errorMessage.style.display = "none";
+          return true;
+        }
+      }
+    </script>
+  </body>
+</html>
