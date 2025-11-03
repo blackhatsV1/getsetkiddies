@@ -138,7 +138,66 @@ app.get("/dashboard", (req, res) => {
 
 app.get("/track-child", (req, res) => {
   if (!req.session.parent) return res.redirect("/login");
-  res.render("pages/track-child", { title: "Get Set Kiddies", parent: req.session.parent });
+
+  const parentId = req.session.parent.id;
+  const childId = req.query.child_id;
+
+  // Fetch parent's children
+  const childrenSql = "SELECT id, firstname, lastname FROM registered_children WHERE parent_id = ?";
+  db.query(childrenSql, [parentId], (err, childrenResults) => {
+    if (err) {
+      console.error("Error fetching children:", err);
+      return res.status(500).send("Database error");
+    }
+
+    let selectedChild = null;
+    let childLocation = null;
+
+    if (childId) {
+      selectedChild = childrenResults.find(child => child.id == childId);
+      if (selectedChild) {
+        // Fetch last location for the selected child
+        const locationSql = `
+          SELECT latitude, longitude, readable_address, date_time
+          FROM locations
+          WHERE child_id = ?
+          ORDER BY date_time DESC
+          LIMIT 1
+        `;
+        db.query(locationSql, [childId], (err, locationResults) => {
+          if (err) {
+            console.error("Error fetching location:", err);
+          } else if (locationResults.length > 0) {
+            childLocation = locationResults[0];
+          }
+
+          res.render("pages/track-child", {
+            title: "Track Child",
+            parent: req.session.parent,
+            children: childrenResults,
+            selectedChild,
+            childLocation
+          });
+        });
+      } else {
+        res.render("pages/track-child", {
+          title: "Track Child",
+          parent: req.session.parent,
+          children: childrenResults,
+          selectedChild: null,
+          childLocation: null
+        });
+      }
+    } else {
+      res.render("pages/track-child", {
+        title: "Track Child",
+        parent: req.session.parent,
+        children: childrenResults,
+        selectedChild: null,
+        childLocation: null
+      });
+    }
+  });
 });
 
 app.get("/register-child", (req, res) => {

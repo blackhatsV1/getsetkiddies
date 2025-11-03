@@ -1,5 +1,5 @@
-- [x] Add DELETE endpoint in api/children.js to remove a child by ID, ensuring only the parent can remove their child.
-- [x] Update views/pages/dashboard.ejs to include a remove button for each child with confirmation.
-- [x] Change remove button to minus symbol with red rounded background.
-- [x] Fix button functionality by using event listeners.
-- [ ] Test the remove functionality by registering a child and then removing it.
+- [x] Update side-nav-parents.ejs: Add a child selection dropdown when on track-child page, populated with parent's children.
+- [x] Update server.js /track-child: Fetch parent's children and pass to view; if child_id query param, fetch that child's last location.
+- [x] Update track-child.ejs: Display selected child's name and location if available.
+- [x] Update locationselect.js: Instead of geolocation, display the fetched child's location on map; remove save functionality as locations come from Arduino.
+- [x] Add GET route in api/locations.js to fetch last location for a child.

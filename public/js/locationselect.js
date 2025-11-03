@@ -8,42 +8,24 @@ document.addEventListener('DOMContentLoaded', () => {
     attribution: '© OpenStreetMap contributors'
   }).addTo(map);
 
-  // Function to save location to backend
-  function saveLocationToDB(name, latitude, longitude) {
-    fetch('/api/locations', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, latitude, longitude })
-    })
-      .then(res => res.json())
-      .then(data => console.log('✅ Saved to database:', data))
-      .catch(err => console.error('❌ Error saving location:', err));
-  }
+  // Check if child location data is available (passed from server)
+  const childLocation = window.childLocation;
+  const selectedChild = window.selectedChild;
 
-  // Detect user's location
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
+  if (selectedChild && childLocation) {
+    const { latitude, longitude, readable_address } = childLocation;
 
-        // Center map
-        map.setView([latitude, longitude], 15);
+    // Center map on child's location
+    map.setView([latitude, longitude], 15);
 
-        // Add marker
-        const marker = L.marker([latitude, longitude]).addTo(map);
-        marker.bindPopup('📍 You are here').openPopup();
+    // Add marker
+    const marker = L.marker([latitude, longitude]).addTo(map);
+    marker.bindPopup(`📍 ${selectedChild.firstname} ${selectedChild.lastname} is here`).openPopup();
 
-        console.log(`Current Location: ${latitude}, ${longitude}`);
-
-        // Save to database (you can customize the name)
-        saveLocationToDB('Current User', latitude, longitude);
-      },
-      (error) => {
-        console.error('Geolocation error:', error);
-        alert('Unable to get your location.');
-      }
-    );
+    console.log(`Child Location: ${latitude}, ${longitude}`);
   } else {
-    alert('Geolocation is not supported by this browser.');
+    // Default view if no child selected or no location
+    map.setView([0, 0], 2);
+    console.log('No child selected or no location data available.');
   }
 });
