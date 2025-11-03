@@ -94,6 +94,9 @@ CREATE TABLE `registered_children` (
   `parent_email` varchar(100) DEFAULT NULL,
   `parent_number` varchar(20) DEFAULT NULL,
   `parent_home_address` text DEFAULT NULL,
+  `geofence_lat` double DEFAULT NULL,
+  `geofence_lng` double DEFAULT NULL,
+  `geofence_radius` int(11) DEFAULT NULL,
   `date_registered` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 

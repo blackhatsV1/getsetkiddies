@@ -1,6 +1,5 @@
-# TODO: Add Buttons to Dashboard
-
-- [x] Add "Geofence Settings" button in upper right above the table
-- [x] Add "Track Child" and "Add Kids" buttons below the table, aligned horizontally at bottom right
-- [x] Update CSS for button styling
-- [x] Test the buttons to ensure they link correctly
+- [x] Add DELETE endpoint in api/children.js to remove a child by ID, ensuring only the parent can remove their child.
+- [x] Update views/pages/dashboard.ejs to include a remove button for each child with confirmation.
+- [x] Change remove button to minus symbol with red rounded background.
+- [x] Fix button functionality by using event listeners.
+- [ ] Test the remove functionality by registering a child and then removing it.

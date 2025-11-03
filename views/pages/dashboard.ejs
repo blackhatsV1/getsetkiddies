@@ -14,7 +14,7 @@
 
         <div class="dashboard-header" style="margin-top: 80px;">
             <h2>Your Registered Kids</h2>
-            <a href="#" class="geofence-btn">Geofence Settings</a>
+            <a href="/geofence-settings" class="geofence-btn">Geofence Settings</a>
         </div>
         <% if (children && children.length > 0) { %>
             <table class="kids-table">
@@ -26,6 +26,7 @@
                         <th>Date Registered</th>
                         <th>Current Location</th>
                         <th>Geofence Location</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -36,7 +37,10 @@
                             <td><%= child.child_gender %></td>
                             <td><%= new Date(child.date_registered).toLocaleDateString() %></td>
                             <td><%= child.current_location %></td>
-                            <td><%= child.geofence_location %></td>
+                            <td><%= child.geofence %></td>
+                            <td>
+                                <button class="remove-btn" data-id="<%= child.id %>" data-name="<%= child.firstname %> <%= child.lastname %>">&minus;</button>
+                            </td>
                         </tr>
                     <% }); %>
                 </tbody>
@@ -52,5 +56,42 @@
     </main>
   </div>
   <%- include('../partials/footer') %>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.remove-btn').forEach(button => {
+        button.addEventListener('click', function() {
+          const childId = this.getAttribute('data-id');
+          const childName = this.getAttribute('data-name');
+          removeChild(childId, childName);
+        });
+      });
+    });
+
+    function removeChild(childId, childName) {
+      if (confirm(`Are you sure you want to remove ${childName}? This action cannot be undone.`)) {
+        fetch(`/api/children/remove/${childId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.message) {
+            alert('Child removed successfully!');
+            location.reload(); // Refresh the page to update the table
+          } else {
+            alert('Error: ' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while removing the child.');
+        });
+      }
+    }
+  </script>
 </body>
 
