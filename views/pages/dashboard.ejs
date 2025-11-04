@@ -14,7 +14,7 @@
 
         <div class="dashboard-header" style="margin-top: 80px;">
             <h2>Your Registered Kids</h2>
-            <a href="/geofence-settings" class="geofence-btn">Geofence Settings</a>
+            <a href="/geofence-settings" class="geofence-btn">Safezone Settings</a>
         </div>
         <% if (children && children.length > 0) { %>
             <table class="kids-table">
@@ -25,7 +25,7 @@
                         <th>Gender</th>
                         <th>Date Registered</th>
                         <th>Current Location</th>
-                        <th>Geofence Location</th>
+                        <th>Safezone Location</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -37,7 +37,7 @@
                             <td><%= child.child_gender %></td>
                             <td><%= new Date(child.date_registered).toLocaleDateString() %></td>
                             <td><%= child.current_location %></td>
-                            <td><%= child.geofence %></td>
+                            <td><%= child.safezone || 'Not set' %></td>
                             <td>
                                 <button class="remove-btn" data-id="<%= child.id %>" data-name="<%= child.firstname %> <%= child.lastname %>">&minus;</button>
                             </td>
@@ -45,20 +45,59 @@
                     <% }); %>
                 </tbody>
             </table>
-        <% } else { %>
-            <p>No kids registered yet. <a href="/register-child">Register a child</a></p>
-        <% } %>
 
-        <div class="dashboard-actions">
-            <a href="http://localhost:3000/track-child" class="action-btn track-btn">Track Child</a>
-            <a href="http://localhost:3000/register-child" class="action-btn add-kids-btn">Add Kids</a>
-        </div>
+            <div class="dashboard-actions">
+                <a href="http://localhost:3000/track-child" class="action-btn track-btn">Track Child</a>
+                <a href="http://localhost:3000/register-child" class="action-btn add-kids-btn">Add Kids</a>
+            </div>
+        <% } else { %>
+            <!-- Child Registration Form -->
+            <div class="register-form-container">
+                <div class="register_card">
+                    <h2>Register Your First Child</h2>
+
+                    <form id="childForm">
+                        <input type="hidden" id="parent_id" name="parent_id" />
+                        <input type="hidden" id="parent_email" name="parent_email" />
+                        <input type="hidden" id="parent_number" name="parent_number" />
+                        <input type="hidden" id="parent_home_address" name="parent_home_address" />
+
+                        <div class="input-group">
+                            <input type="text" name="firstname" id="firstname" placeholder=" " required />
+                            <label for="firstname">Child First Name</label>
+                        </div>
+
+                        <div class="input-group">
+                            <input type="text" name="lastname" id="lastname" placeholder=" " required />
+                            <label for="lastname">Child Last Name</label>
+                        </div>
+
+                        <div class="input-group">
+                            <input type="number" name="child_age" id="child_age" placeholder=" " required />
+                            <label for="child_age">Child Age</label>
+                        </div>
+
+                        <div class="input-group">
+                            <select name="child_gender" id="child_gender" required>
+                                <option value="" disabled selected hidden></option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                            <label for="child_gender">Child Gender</label>
+                        </div>
+
+                        <button type="submit">Register Child</button>
+                    </form>
+                </div>
+            </div>
+        <% } %>
     </main>
   </div>
   <%- include('../partials/footer') %>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      // Handle remove buttons for children table
       document.querySelectorAll('.remove-btn').forEach(button => {
         button.addEventListener('click', function() {
           const childId = this.getAttribute('data-id');
@@ -66,6 +105,52 @@
           removeChild(childId, childName);
         });
       });
+
+      // Handle child registration form
+      const form = document.getElementById('childForm');
+      if (form) {
+        // Fetch parent data for hidden fields
+        fetch("/api/parents/current", { credentials: "include" })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.parent) {
+              const parent = data.parent;
+              document.getElementById("parent_id").value = parent.id;
+              document.getElementById("parent_email").value = parent.email;
+              document.getElementById("parent_number").value = parent.phone_number;
+              document.getElementById("parent_home_address").value = parent.home_address;
+            }
+          })
+          .catch((err) => console.error("Error fetching parent:", err));
+
+        // Handle form submission
+        form.addEventListener("submit", (e) => {
+          e.preventDefault();
+
+          const formData = new FormData(form);
+          const data = Object.fromEntries(formData.entries());
+
+          fetch("/api/children/register", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          })
+            .then((res) => res.json())
+            .then((result) => {
+              if (result.message) {
+                alert("Child registered successfully!");
+                location.reload(); // Refresh to show the table
+              } else {
+                alert("Failed to register child.");
+              }
+            })
+            .catch((err) => {
+              console.error("Error:", err);
+              alert("Error registering child.");
+            });
+        });
+      }
     });
 
     function removeChild(childId, childName) {

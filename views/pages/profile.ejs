@@ -1,0 +1,121 @@
+<%- include('../partials/head') %>
+
+<body>
+  <!-- Include top navigation -->
+  <%- include('../partials/top-nav-parents') %>
+
+  <div class="main-container">
+    <%- include('../partials/side-nav-parents') %>
+
+    <main class="content">
+      <h1>Parent Profile</h1>
+
+      <div class="profile-container">
+        <div class="profile-main">
+          <!-- Profile Picture Section -->
+          <div class="profile-pic-section">
+            <div class="profile-pic-container">
+              <img id="profile-pic" src="/images/default-profile.png" alt="Profile Picture" class="profile-pic">
+            </div>
+            <input type="file" id="profile-pic-input" accept="image/*" style="display: none;">
+            <button id="upload-btn" class="upload-btn">Upload Picture</button>
+          </div>
+
+          <!-- Parent Information -->
+          <div class="profile-info">
+            <div class="info-group">
+              <label for="name">Name:</label>
+              <h2 id="name"><%= parent.firstname %> <%= parent.lastname %></h2>
+            </div>
+
+            <div class="info-group">
+              <label for="phone">Phone Number:</label>
+              <p id="phone"><%= parent.phone_number %></p>
+            </div>
+
+            <div class="info-group">
+              <label for="email">Email:</label>
+              <p id="email"><%= parent.email %></p>
+            </div>
+
+            <div class="info-group">
+              <label for="description">Description:</label>
+              <textarea id="description" rows="4" placeholder="Enter a short description about yourself"><%= parent.description || '' %></textarea>
+              <button id="save-description-btn" class="save-btn">Save Description</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Children's List -->
+        <div class="children-section">
+          <h3>Your Children</h3>
+          <% if (children && children.length > 0) { %>
+            <ul class="children-list">
+              <% children.forEach(child => { %>
+                <li><%= child.firstname %> <%= child.lastname %></li>
+              <% }); %>
+            </ul>
+          <% } else { %>
+            <p>No children registered yet.</p>
+          <% } %>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <%- include('../partials/footer') %>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const uploadBtn = document.getElementById('upload-btn');
+      const profilePicInput = document.getElementById('profile-pic-input');
+      const profilePic = document.getElementById('profile-pic');
+      const saveDescriptionBtn = document.getElementById('save-description-btn');
+      const descriptionTextarea = document.getElementById('description');
+
+      // Handle profile picture upload
+      uploadBtn.addEventListener('click', function() {
+        profilePicInput.click();
+      });
+
+      profilePicInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            profilePic.src = e.target.result;
+            // Here you would typically upload the file to the server
+            // For now, just display it locally
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // Handle description save
+      saveDescriptionBtn.addEventListener('click', function() {
+        const description = descriptionTextarea.value;
+
+        fetch('/api/parents/update-description', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ description: description })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Description updated successfully!');
+          } else {
+            alert('Error updating description: ' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while updating the description.');
+        });
+      });
+    });
+  </script>
+</body>

@@ -48,7 +48,7 @@
                 <input type="number" id="radius" name="radius" placeholder="Enter radius in meters" min="50" max="5000" />
             </div>
 
-            <button type="submit" class="submit-btn">Save Geofence</button>
+            <button type="submit" class="submit-btn">Save Safezone</button>
         </form>
 
         <div id="message" class="message"></div>
@@ -149,14 +149,14 @@
         .then(response => response.json())
         .then(data => {
             if (data.message) {
-                alert('Geofence settings saved successfully!');
+                alert('Safezone settings saved successfully!');
             } else {
                 alert('Error: ' + data.error);
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while saving geofence settings.');
+            alert('An error occurred while saving safezone settings.');
         });
 
         // Clear the form

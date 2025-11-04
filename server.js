@@ -26,6 +26,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
 // ✅ Sessions
 app.use(
@@ -88,7 +89,7 @@ app.get("/dashboard", (req, res) => {
           child_gender: row.child_gender,
           date_registered: row.date_registered,
           current_location: null,
-          geofence_location: row.readable_address || 'Not set',
+          safezone_location: row.readable_address || 'Not set',
         });
       }
       if (row.latitude && row.longitude) {
@@ -99,17 +100,29 @@ app.get("/dashboard", (req, res) => {
 
     const childrenWithGeofence = Array.from(childrenMap.values()).map(child => {
       return new Promise((resolve) => {
-        const geofenceSql =
+        const safezoneSql =
           "SELECT geofence_lat, geofence_lng, geofence_radius FROM registered_children WHERE id = ?";
-        db.query(geofenceSql, [child.id], (err, geofenceResults) => {
+        db.query(safezoneSql, [child.id], (err, safezoneResults) => {
           if (err) {
-            console.error("Error fetching geofence:", err);
-            child.geofence = "Not set";
-          } else if (geofenceResults.length > 0 && geofenceResults[0].geofence_lat) {
-            const geo = geofenceResults[0];
-            child.geofence = `Lat: ${geo.geofence_lat}, Lng: ${geo.geofence_lng}, Radius: ${geo.geofence_radius}m`;
+            console.error("Error fetching safezone:", err);
+            child.safezone = "Not set";
+          } else if (safezoneResults.length > 0 && safezoneResults[0].geofence_lat) {
+            const geo = safezoneResults[0];
+            // Check if coordinates match preset locations (rounded to 4 decimal places)
+            const presets = {
+              '10.7147,122.5621': 'University of Iloilo',
+              '10.8322,122.4156': 'Tubungan Public Market',
+              '10.7833,122.3833': 'Leon Public Market'
+            };
+            const coordKey = `${parseFloat(geo.geofence_lat).toFixed(4)},${parseFloat(geo.geofence_lng).toFixed(4)}`;
+            const locationName = presets[coordKey];
+            if (locationName) {
+              child.safezone = `${locationName} (${geo.geofence_radius}m radius)`;
+            } else {
+              child.safezone = `Custom Location (${geo.geofence_radius}m radius)`;
+            }
           } else {
-            child.geofence = "Not set";
+            child.safezone = "Not set";
           }
           resolve(child);
         });
@@ -217,9 +230,45 @@ app.get("/geofence-settings", (req, res) => {
     }
 
     res.render("pages/geofence-settings", {
-      title: "Geofence Settings",
+      title: "Safezone Settings",
       parent: req.session.parent,
       children: results,
+    });
+  });
+});
+
+app.get("/profile", (req, res) => {
+  if (!req.session.parent) return res.redirect("/login");
+
+  const parentId = req.session.parent.id;
+
+  // Fetch parent details including description
+  const parentSql = "SELECT * FROM parents WHERE id = ?";
+  db.query(parentSql, [parentId], (err, parentResults) => {
+    if (err) {
+      console.error("Error fetching parent:", err);
+      return res.status(500).send("Database error");
+    }
+
+    if (parentResults.length === 0) {
+      return res.status(404).send("Parent not found");
+    }
+
+    const parent = parentResults[0];
+
+    // Fetch children
+    const childrenSql = "SELECT id, firstname, lastname FROM registered_children WHERE parent_id = ?";
+    db.query(childrenSql, [parentId], (err, childrenResults) => {
+      if (err) {
+        console.error("Error fetching children:", err);
+        return res.status(500).send("Database error");
+      }
+
+      res.render("pages/profile", {
+        title: "Parent Profile",
+        parent: parent,
+        children: childrenResults,
+      });
     });
   });
 });

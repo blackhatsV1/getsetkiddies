@@ -268,3 +268,211 @@ body {
     background-color: #c82333;
 }
 
+/* Profile Page Styles */
+.profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profile-main {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+    margin-bottom: 30px;
+}
+
+.profile-pic-section {
+    flex-shrink: 0;
+    text-align: center;
+}
+
+.profile-pic-container {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 4px solid #ddd;
+    overflow: hidden;
+    margin: 0 auto 10px auto;
+}
+
+.profile-pic {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.upload-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.upload-btn:hover {
+    background-color: #0056b3;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.info-group {
+    margin-bottom: 20px;
+}
+
+.info-group label {
+    display: block;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.info-group h2 {
+    margin: 0;
+    color: #333;
+    font-size: 24px;
+}
+
+.info-group p {
+    margin: 0;
+    color: #666;
+    font-size: 16px;
+}
+
+.info-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.save-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 10px;
+    transition: background-color 0.3s;
+}
+
+.save-btn:hover {
+    background-color: #218838;
+}
+
+.children-section {
+    border-top: 1px solid #ddd;
+    padding-top: 20px;
+}
+
+.children-section h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.children-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.children-list li {
+    background-color: #fff;
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+/* Dashboard Registration Form Styles */
+.register-form-container {
+    margin-top: 20px;
+}
+
+.register-form-container .register_card {
+    background-color: white;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 40px 35px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.register-form-container .register_card h2 {
+    color: green;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 24px;
+}
+
+.register-form-container .input-group {
+    background-color: white;
+    position: relative;
+    width: 100%;
+    margin-bottom: 25px;
+    border: none;
+    border-radius: 10px;
+}
+
+.register-form-container .input-group input,
+.register-form-container .input-group select {
+    width: 100%;
+    padding: 14px 12px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    outline: none;
+    font-size: 16px;
+    background: none;
+    box-sizing: border-box;
+}
+
+.register-form-container .input-group label {
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    color: rgb(95, 95, 95);
+    background: white;
+    transition: 0.3s ease;
+    padding: 0 5px;
+    pointer-events: none;
+}
+
+.register-form-container .input-group input:focus + label,
+.register-form-container .input-group input:not(:placeholder-shown) + label,
+.register-form-container .input-group select:focus + label {
+    top: -10px;
+    left: 10px;
+    font-size: 12px;
+    color: black;
+}
+
+.register-form-container button {
+    background-color: rgb(27, 28, 46);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+.register-form-container button:hover {
+    background-color: #8b3c8b;
+}
+

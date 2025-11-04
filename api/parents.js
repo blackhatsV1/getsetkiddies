@@ -57,9 +57,34 @@ router.get("/logout", (req, res) => {
 
     // Clear cookie if set
     res.clearCookie("connect.sid");
-    res.redirect("/login"); 
+    res.redirect("/login");
   });
 });
 
+// Update parent description
+router.post("/update-description", (req, res) => {
+  if (!req.session.parent) {
+    return res.status(401).json({ success: false, message: "Not logged in" });
+  }
+
+  const { description } = req.body;
+  const parentId = req.session.parent.id;
+
+  const sql = "UPDATE parents SET description = ? WHERE id = ?";
+  db.query(sql, [description, parentId], (err, result) => {
+    if (err) {
+      console.error("Error updating description:", err);
+      return res.status(500).json({ success: false, message: "Database error" });
+    }
+
+    if (result.affectedRows > 0) {
+      // Update session data
+      req.session.parent.description = description;
+      res.json({ success: true, message: "Description updated successfully" });
+    } else {
+      res.status(404).json({ success: false, message: "Parent not found" });
+    }
+  });
+});
 
 export default router;

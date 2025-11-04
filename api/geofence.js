@@ -3,7 +3,7 @@ import db from "../db/connection.js";
 
 const router = express.Router();
 
-// Save geofence settings
+// Save safezone settings
 router.post("/save", (req, res) => {
   const { childId, latitude, longitude, radius } = req.body;
 
@@ -28,7 +28,7 @@ router.post("/save", (req, res) => {
 
   db.query(sql, [lat, lng, rad, childId], (err, result) => {
     if (err) {
-      console.error("Error saving geofence:", err);
+      console.error("Error saving safezone:", err);
       return res.status(500).json({ error: "Database error" });
     }
 
@@ -36,7 +36,7 @@ router.post("/save", (req, res) => {
       return res.status(404).json({ error: "Child not found" });
     }
 
-    res.json({ message: "Geofence settings saved successfully" });
+    res.json({ message: "Safezone settings saved successfully" });
   });
 });
 
