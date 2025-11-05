@@ -55,38 +55,215 @@
   <div class="main-container">
     <%- include('../partials/side-nav-parents') %>
 
-    <main class="content">
-      <h1>Register your Child to Get Set Kiddies</h1>
-        <div>
-            <div class="register_child">
-                <h3>Register Your Child</h3>
+        <style>
+  body {
+    font-family: "Roboto", sans-serif;
+    background-color: #c54478;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+  }
 
-                <form id="childForm">
-                <input type="hidden" id="parent_id" name="parent_id" />
-                <input type="hidden" id="parent_email" name="parent_email" />
-                <input type="hidden" id="parent_number" name="parent_number" />
-                <input type="hidden" id="parent_home_address" name="parent_home_address" />
+  /* Logo / Branding */
+  .logo-container {
+    text-align: center;
+    margin-bottom: 20px;
+  }
 
-                <label>Child First Name:</label>
-                <input type="text" name="firstname" required /><br />
+  .map-pin {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    background-color: #692e69;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    margin: 0 auto 15px;
+  }
 
-                <label>Child Last Name:</label>
-                <input type="text" name="lastname" required /><br />
+  .pin-center {
+    position: absolute;
+    top: 25%;
+    left: 25%;
+    width: 60px;
+    height: 60px;
+    background-color: white;
+    border-radius: 50%;
+    transform: rotate(45deg);
+  }
 
-                <label>Child Age:</label>
-                <input type="number" name="child_age" required /><br />
+  .logo-text {
+    font-size: 28px;
+    font-weight: bold;
+  }
 
-                <label>Child Gender:</label>
-                <select name="child_gender" required>
-                    <option value="" disabled selected>Select gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                </select><br />
+  .white-text { color: #ffffff; }
+  .yellow-text { color: #ffff00; }
 
-                <button type="submit">Register Child</button>
-                </form>
-            </div>
-        </div>
+  /* Registration Form */
+  .register-form {
+    background-color: white;
+    border-radius: 20px;
+    width: 380px;
+    padding: 40px 35px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .register-form h1 {
+    color: #692e69;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .input-group {
+    position: relative;
+    width: 100%;
+    margin-bottom: 25px;
+  }
+
+  .input-group input,
+  .input-group select {
+    width: 100%;
+    padding: 14px 12px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    outline: none;
+    font-size: 16px;
+    background: none;
+    box-sizing: border-box;
+  }
+
+  .input-group label {
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    color: #888;
+    background: white;
+    transition: 0.3s ease;
+    padding: 0 5px;
+    pointer-events: none;
+  }
+
+  .input-group input:focus + label,
+  .input-group input:not(:placeholder-shown) + label,
+  .input-group select:focus + label,
+  .input-group select:not([value=""]) + label {
+    top: -10px;
+    left: 10px;
+    font-size: 12px;
+    color: #692e69;
+  }
+
+  .register-form button {
+    background-color: #692e69;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    transition: background-color 0.3s;
+  }
+
+  .register-form button:hover {
+    background-color: #8b3c8b;
+  }
+
+  .register-form p {
+    text-align: center;
+    margin-top: 15px;
+    color: #333;
+  }
+
+  .register-form a {
+    color: #692e69;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .register-form a:hover {
+    text-decoration: underline;
+  }
+
+  /* Responsive */
+  @media (max-width: 500px) {
+    .register-form {
+      width: 90%;
+      padding: 30px 20px;
+    }
+
+    .map-pin {
+      width: 100px;
+      height: 100px;
+    }
+
+    .pin-center {
+      width: 50px;
+      height: 50px;
+      top: 25%;
+      left: 25%;
+    }
+
+    .logo-text {
+      font-size: 24px;
+    }
+  }
+</style>
+
+<div class="logo-container">
+  <div class="map-pin">
+    <div class="pin-center"></div>
+  </div>
+  <h1 class="logo-text">
+    <span class="white-text">GetSet</span> <span class="yellow-text">Kiddies</span>
+  </h1>
+</div>
+
+<div class="register-form">
+  <h1>Register Your Child</h1>
+
+  <form id="childForm">
+    <!-- Hidden parent info -->
+    <input type="hidden" id="parent_id" name="parent_id" />
+    <input type="hidden" id="parent_email" name="parent_email" />
+    <input type="hidden" id="parent_number" name="parent_number" />
+    <input type="hidden" id="parent_home_address" name="parent_home_address" />
+
+    <div class="input-group">
+      <input type="text" name="firstname" id="firstname" placeholder=" " required />
+      <label for="firstname">Child First Name</label>
+    </div>
+
+    <div class="input-group">
+      <input type="text" name="lastname" id="lastname" placeholder=" " required />
+      <label for="lastname">Child Last Name</label>
+    </div>
+
+    <div class="input-group">
+      <input type="number" name="child_age" id="child_age" placeholder=" " required />
+      <label for="child_age">Child Age</label>
+    </div>
+
+    <div class="input-group">
+      <select name="child_gender" id="child_gender" required>
+        <option value="" disabled selected>Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+      <label for="child_gender">Child Gender</label>
+    </div>
+
+    <button type="submit">Register Child</button>
+    <p>Already registered? <a href="/geofence-setup">Set Geofence</a></p>
+  </form>
+</div>
+
     </main>
   </div>
   <%- include('../partials/footer') %>

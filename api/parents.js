@@ -45,7 +45,7 @@ router.post("/login", (req, res) => {
     if (result.length === 0) return res.status(401).send("Invalid credentials");
 
     req.session.parent = result[0];
-    res.redirect("/dashboard");
+    res.redirect("/geofence-view");
   });
 });
 

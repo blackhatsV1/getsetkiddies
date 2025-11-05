@@ -138,6 +138,19 @@
   .login-form a:hover {
     text-decoration: underline;
   }
+  .back-arrow {
+    display: inline-block;
+    margin-top: 15px;
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s;
+  }
+
+  .back-arrow:hover {
+    color: #ffff00;
+  }
 </style>
 
   </head>
@@ -149,6 +162,7 @@
       <h1 class="logo-text">
         <span class="white-text">GetSet</span> <span class="yellow-text">Kiddies</span>
       </h1>
+      <a href="/" class="back-arrow">&#8592; Back to Home</a>
     </div>
 
     <form action="/api/parents/login" method="POST" class="login-form">

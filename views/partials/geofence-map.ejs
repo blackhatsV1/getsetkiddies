@@ -3,6 +3,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
+  /* Map Container */
   #mapContainer {
     margin-top: 20px;
     width: 100%;
@@ -12,28 +13,86 @@
   #map {
     height: 400px;
     width: 100%;
-    border: 1px solid #222;
-    border-radius: 8px;
+    border: 1px solid #692e69;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   }
 
+  /* Geofence Info */
   #geoInfo {
     margin-top: 15px;
     font-size: 15px;
+    color: #333;
   }
 
+  /* Geofence Inputs */
+  #geofenceInputs {
+    margin-top: 20px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 400px;
+  }
+
+  #geofenceInputs label {
+    font-weight: bold;
+    font-size: 14px;
+    color: #692e69;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  #geofenceInputs input[type="text"],
+  #geofenceInputs input[type="number"] {
+    padding: 10px 12px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    font-size: 14px;
+    transition: border-color 0.3s;
+  }
+
+  #geofenceInputs input:focus {
+    border-color: #692e69;
+  }
+
+  /* Save Button */
   #saveGeofence {
-    background-color: #007bff;
+    background-color: #692e69;
     color: white;
     border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
+    padding: 10px 16px;
+    border-radius: 8px;
     cursor: pointer;
-    margin-top: 10px;
+    font-size: 14px;
+    transition: background-color 0.3s;
+  }
+
+  #saveGeofence:hover:not(:disabled) {
+    background-color: #8b3c8b;
   }
 
   #saveGeofence:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+
+  /* Responsive */
+  @media (max-width: 500px) {
+    #geofenceInputs {
+      width: 90%;
+      margin: 20px auto 0 auto;
+      padding: 15px;
+    }
+
+    #map {
+      height: 300px;
+    }
   }
 </style>
 
@@ -42,14 +101,13 @@
 <div id="geofenceInputs">
   <label>Geofence Name: 
     <input type="text" id="geoName" placeholder="Home / School" />
-  </label><br>
+  </label>
   <label>Radius (meters): 
     <input type="number" id="radius" value="100" min="10" />
-  </label><br>
+  </label>
   <button id="saveGeofence" disabled>Save Geofence</button>
 </div>
 
 <div id="mapContainer">
   <div id="map"></div>
 </div>
-
