@@ -116,11 +116,11 @@ app.get("/dashboard", (req, res) => {
             };
             const coordKey = `${parseFloat(geo.geofence_lat).toFixed(4)},${parseFloat(geo.geofence_lng).toFixed(4)}`;
             const locationName = presets[coordKey];
-            if (locationName) {
-              child.safezone = `${locationName} (${geo.geofence_radius}m radius)`;
-            } else {
-              child.safezone = `Custom Location (${geo.geofence_radius}m radius)`;
-            }
+    if (locationName) {
+      child.safezone = `${locationName} (${geo.geofence_radius}m)`;
+    } else {
+      child.safezone = `Custom Location (${geo.geofence_radius}m)`;
+    }
           } else {
             child.safezone = "Not set";
           }
