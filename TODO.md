@@ -1,7 +1,3 @@
-- [x] Modify views/pages/dashboard.ejs: Add conditional class 'outside-safezone' to <tr> element if child.outside_safezone is true, and change the warning display in Actions <td> to only show "⚠️" (remove "OUTSIDE SAFEZONE").
-- [x] Modify public/css/style.css: Add a new CSS rule for .outside-safezone to set background-color: orange; for the entire row.
-- [x] Move the warning triangle from Actions column to Safezone Location column.
-- [x] Change the orange background color to a lighter shade.
-- [x] Fix hover on table rows: Maintain light orange color on hover and click for outside-safezone rows.
-- [x] Add tooltip on hover for outside-safezone rows: "Warning: Child name is outside the safezone."
-- [x] Style the tooltip: font size 16px, background black with opacity 0.5.
+- [x] Modify views/pages/dashboard.ejs: Remove the "Start Tracking" button from the dashboard.
+- [x] Modify views/pages/track-child.ejs: Add a "Start Tracking" button to the track-child page for the selected child.
+- [x] Create public/js/locationtracker.js: Implement periodic location fetching using setInterval every 15 minutes, use navigator.geolocation, send to /api/locations, include error handling and visual feedback.

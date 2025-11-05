@@ -34,6 +34,10 @@
         <% } else { %>
           <p>No location data available for this child.</p>
         <% } %>
+
+        <div class="tracking-controls" style="margin-top: 20px;">
+          <button id="start-tracking-btn" class="track-btn" data-id="<%= selectedChild.id %>" data-name="<%= selectedChild.firstname %> <%= selectedChild.lastname %>">Start Tracking</button>
+        </div>
       <% } else { %>
         <p>Please select a child to track.</p>
       <% } %>
@@ -47,6 +51,7 @@
       <!-- ✅ Include map/location selector partial -->
       <%- include('../partials/locationselect') %>
 
+      <script src="/js/locationtracker.js"></script>
       <script>
         document.addEventListener('DOMContentLoaded', function() {
           const childSelect = document.getElementById('child-select');
