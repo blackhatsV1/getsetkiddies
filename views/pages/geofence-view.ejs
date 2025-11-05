@@ -1,0 +1,178 @@
+<%- include('../partials/head') %>
+<body>
+  <%- include('../partials/top-nav-parents') %>
+
+  <div class="main-container">
+    <%- include('../partials/side-nav-parents') %>
+
+    <main class="content">
+      <h2>All Geofences for Your Children</h2>
+      <p>Logged in as: <%= parent.firstname %> <%= parent.lastname %></p>
+
+      <% if (geofences.length === 0) { %>
+        <p>No geofences have been added yet.</p>
+      <% } else { %>
+        
+
+        <table id="geoTable" border="1" style="width:100%; border-collapse: collapse; margin-top: 20px;">
+            <thead>
+                <tr>
+                <th>Child</th>
+                <th>Geofence Name</th>
+                <th>Radius (m)</th>
+                <th>Status</th>
+                <th>Last Known Location</th>
+                <th>Last Updated</th>
+                </tr>
+            </thead>
+            <tbody id="geoBody">
+                <% geofences.forEach(g => { %>
+                <tr 
+                    data-fence-lat="<%= g.fence_lat %>" 
+                    data-fence-lng="<%= g.fence_lng %>"
+                    data-child-lat="<%= g.child_lat || '' %>"
+                    data-child-lng="<%= g.child_lng || '' %>"
+                    data-radius="<%= g.radius %>"
+                >
+                    <td class="child-name"><%= g.firstname %> <%= g.lastname %></td>
+                    <td><%= g.geofence_name %></td>
+                    <td><%= g.radius %></td>
+                    <td class="status-cell">Calculating...</td>
+                    <td class="location-cell">
+                    <% if (g.child_lat && g.child_lng) { %>
+                        <%= g.child_lat.toFixed(5) %>, <%= g.child_lng.toFixed(5) %>
+                    <% } else { %>
+                        <em>No data</em>
+                    <% } %>
+                    </td>
+                    <td><%= g.date_time ? new Date(g.date_time).toLocaleString('en-PH') : '—' %></td>
+                </tr>
+                <% }) %>
+            </tbody>
+            </table>
+
+      <% } %>
+      <div id="map" style="height: 600px; width: 100%; border-radius: 8px;"></div>
+    </main>
+  </div>
+
+  <%- include('../partials/footer') %>
+
+  <!-- Leaflet JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+const geofences = <%- JSON.stringify(geofences) %>;
+
+// Leaflet map setup
+const map = L.map('map').setView([10.3157, 123.8854], 12);
+
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '© OpenStreetMap'
+}).addTo(map);
+
+// Function to calculate distance (in meters)
+function distance(lat1, lon1, lat2, lon2) {
+  const R = 6371000; // meters
+  const toRad = deg => deg * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = 
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Convert coordinates to human-readable address
+async function getReadableAddress(lat, lng) {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+    );
+    const data = await res.json();
+    return data.display_name || "Address not found";
+  } catch (err) {
+    console.error("Error fetching address:", err);
+    return "Unknown location";
+  }
+}
+
+// Main loop to plot geofences and children
+async function renderGeofences() {
+  const allCoords = [];
+
+  for (const g of geofences) {
+    const fenceCenter = [g.fence_lat, g.fence_lng];
+    const childLoc = g.child_lat && g.child_lng ? [g.child_lat, g.child_lng] : null;
+
+    // Draw geofence circle
+    const fenceCircle = L.circle(fenceCenter, {
+      radius: g.radius,
+      color: 'blue',
+      fillColor: '#3f8efc',
+      fillOpacity: 0.3
+    }).addTo(map)
+      .bindPopup(`<b>${g.geofence_name}</b><br>Child: ${g.firstname} ${g.lastname}`);
+
+    allCoords.push(fenceCenter);
+
+    // Process child marker
+    if (childLoc) {
+      allCoords.push(childLoc);
+
+      const dist = distance(g.child_lat, g.child_lng, g.fence_lat, g.fence_lng);
+      const inside = dist <= g.radius;
+      const markerColor = inside ? 'green' : 'red';
+
+      const childMarker = L.circleMarker(childLoc, {
+        radius: 6,
+        color: markerColor,
+        fillColor: markerColor,
+        fillOpacity: 0.9
+      }).addTo(map);
+
+      // Fetch human-readable address
+      const address = await getReadableAddress(g.child_lat, g.child_lng);
+
+      // Update table row
+      const row = document.querySelector(
+        `tr[data-child-lat="${g.child_lat}"][data-child-lng="${g.child_lng}"]`
+      );
+      if (row) {
+        const statusCell = row.querySelector(".status-cell");
+        const locCell = row.querySelector(".location-cell");
+
+        statusCell.innerHTML = inside 
+          ? `<span style="color:green;">Inside</span>` 
+          : `<span style="color:red;">Outside (${dist.toFixed(1)} m)</span>`;
+
+        locCell.textContent = address;
+      }
+
+      childMarker.bindPopup(`
+        <b>${g.firstname} ${g.lastname}</b><br>
+        ${inside ? 'Inside' : 'Outside'} geofence<br>
+        Distance: ${dist.toFixed(1)} m<br>
+        Location: ${address}
+      `);
+
+      if (!inside) {
+        L.polyline([childLoc, fenceCenter], { color: 'red', dashArray: '5, 10' }).addTo(map);
+      }
+    }
+  }
+
+  if (allCoords.length > 0) {
+    const bounds = L.latLngBounds(allCoords);
+    if (bounds.isValid()) map.fitBounds(bounds);
+  }
+}
+
+// Run rendering
+renderGeofences();
+</script>
+
+</body>

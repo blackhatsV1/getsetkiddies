@@ -9,15 +9,16 @@ const router = express.Router();
 ----------------------------- */
 // api/geofences.js
 router.get("/setup", (req, res) => {
-  if (!req.session.parent) {
-    return res.redirect("/login");
-  }
+  if (!req.session.parent) return res.redirect("/login");
 
   const parent = req.session.parent;
+  const selectedChildId = req.query.child_id || null;
 
   const sql = `
     SELECT c.id, c.firstname, c.lastname, c.child_age, c.child_gender,
-           l.latitude, l.longitude, l.date_time
+           l.latitude, l.longitude, l.date_time,
+           g.id AS geofence_id, g.name AS geofence_name,
+           g.created_at AS geofence_created_at, g.updated_at AS geofence_updated_at
     FROM registered_children AS c
     LEFT JOIN (
       SELECT child_id, latitude, longitude, date_time
@@ -28,12 +29,13 @@ router.get("/setup", (req, res) => {
         GROUP BY child_id
       )
     ) AS l ON c.id = l.child_id
+    LEFT JOIN geofences AS g ON c.id = g.child_id
     WHERE c.parent_id = ?
   `;
 
   db.query(sql, [parent.id], (err, children) => {
     if (err) {
-      console.error("Error fetching children with last location:", err);
+      console.error(err);
       return res.status(500).send("Database error");
     }
 
@@ -41,28 +43,58 @@ router.get("/setup", (req, res) => {
       title: "Get Set Kiddies",
       parent,
       children,
+      selectedChildId,
     });
   });
 });
 
+
 /* -----------------------------
-   API: Add geofence
+   API: Add or Replace Geofence
 ----------------------------- */
 router.post("/add", (req, res) => {
   const { child_id, name, latitude, longitude, radius } = req.body;
 
-  const sql = `
-    INSERT INTO geofences (child_id, name, latitude, longitude, radius)
-    VALUES (?, ?, ?, ?, ?)
-  `;
-  db.query(sql, [child_id, name, latitude, longitude, radius], (err) => {
+  // First check if the child already has a geofence
+  const checkSql = "SELECT id FROM geofences WHERE child_id = ?";
+  db.query(checkSql, [child_id], (err, results) => {
     if (err) {
-      console.error("Error adding geofence:", err);
-      return res.status(500).send("Database error");
+      console.error("Error checking existing geofence:", err);
+      return res.status(500).json({ error: "Database error" });
     }
-    res.json({ message: "Geofence added successfully" });
+
+    if (results.length > 0) {
+      // Update existing geofence
+      const updateSql = `
+        UPDATE geofences
+        SET name = ?, latitude = ?, longitude = ?, radius = ?, updated_at = NOW()
+        WHERE child_id = ?
+      `;
+      db.query(updateSql, [name, latitude, longitude, radius, child_id], (err2) => {
+        if (err2) {
+          console.error("Error updating geofence:", err2);
+          return res.status(500).json({ error: "Failed to update geofence" });
+        }
+        res.json({ message: "Existing geofence replaced successfully" });
+      });
+
+    } else {
+      // Insert new geofence
+      const insertSql = `
+        INSERT INTO geofences (child_id, name, latitude, longitude, radius, created_at)
+        VALUES (?, ?, ?, ?, ?, NOW())
+      `;
+      db.query(insertSql, [child_id, name, latitude, longitude, radius], (err3) => {
+        if (err3) {
+          console.error("Error adding geofence:", err3);
+          return res.status(500).json({ error: "Database error" });
+        }
+        res.json({ message: "Geofence added successfully" });
+      });
+    }
   });
 });
+
 
 /* -----------------------------
    API: Get geofences for child

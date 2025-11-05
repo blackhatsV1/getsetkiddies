@@ -21,6 +21,7 @@
             <th>Gender</th>
             <th>Last Known Location</th>
             <th>Date & Time</th>
+            <th>Geofence Status</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -56,6 +57,14 @@
                 <% } %>
               </td>
               <td>
+                <% if (child.geofence_id) { %>
+                  Has geofence 
+                  (<%= child.geofence_updated_at ? new Date(child.geofence_updated_at).toLocaleString('en-PH') : new Date(child.geofence_created_at).toLocaleString('en-PH') %>)
+                <% } else { %>
+                  None
+                <% } %>
+              </td>
+              <td>
                 <button class="setGeoBtn"
                   data-child-id="<%= child.id %>"
                   data-child-name="<%= child.firstname %>"
@@ -67,6 +76,7 @@
             </tr>
           <% }) %>
         </tbody>
+
       </table>
 
 

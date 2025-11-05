@@ -35,18 +35,20 @@ document.addEventListener("DOMContentLoaded", () => {
      Load readable addresses
   ------------------------------------ */
   async function loadAddresses() {
-    const rows = document.querySelectorAll("#childrenTable tr[data-child-id]");
-    for (const row of rows) {
-      const lat = parseFloat(row.dataset.lat);
-      const lng = parseFloat(row.dataset.lng);
-      const cell = row.querySelector(".location-cell");
+  const rows = [...document.querySelectorAll("#childrenTable tr[data-child-id]")];
 
-      if (!isNaN(lat) && !isNaN(lng)) {
-        const address = await getReadableAddress(lat, lng);
-        cell.textContent = address;
-      }
+  await Promise.all(rows.map(async (row) => {
+    const lat = parseFloat(row.dataset.lat);
+    const lng = parseFloat(row.dataset.lng);
+    const cell = row.querySelector(".location-cell");
+
+    if (!isNaN(lat) && !isNaN(lng)) {
+      const address = await getReadableAddress(lat, lng);
+      cell.textContent = address;
     }
-  }
+  }));
+}
+
   loadAddresses();
 
   /* ------------------------------------
@@ -127,7 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const { lat, lng } = marker.getLatLng();
 
     try {
-      const res = await fetch("/api/geofence/add", {
+      const res = await fetch("/api/geofences/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -138,6 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
           radius,
         }),
       });
+
 
       const result = await res.json();
       if (res.ok) {

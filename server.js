@@ -15,6 +15,7 @@ import childRoutes from "./api/children.js";
 import locationRoutes from "./api/locations.js";
 import geofenceRoutes from "./api/geofences.js";
 
+
 dotenv.config();
 const app = express();
 
@@ -54,7 +55,7 @@ app.set("view engine", "ejs");
 app.use("/api/parents", parentRoutes);
 app.use("/api/children", childRoutes);
 app.use("/api/locations", locationRoutes);
-app.use("/api/geofence", geofenceRoutes);
+app.use("/api/geofences", geofenceRoutes);
 
 // --------------------------
 // EJS Page Routes
@@ -89,7 +90,53 @@ app.get("/register-child", (req, res) => {
 
 app.get("/track-child", (req, res) => res.redirect("/api/parents"));
 
-app.get("/geofence-setup", (req, res) => res.redirect("/api/geofence/setup"));
+app.get("/geofence-setup", (req, res) => res.redirect("/api/geofences/setup"));
+
+// app.get("/geofence-view", (req, res) => res.redirect("/api/geofences/view"));
+
+app.get("/geofence-view", (req, res) => {
+  if (!req.session.parent) return res.redirect("/login");
+
+  const parent = req.session.parent;
+
+  const sql = `
+    SELECT 
+      g.id AS geofence_id, g.name AS geofence_name, g.latitude AS fence_lat, g.longitude AS fence_lng, g.radius,
+      c.id AS child_id, c.firstname, c.lastname,
+      l.latitude AS child_lat, l.longitude AS child_lng, l.date_time
+    FROM geofences AS g
+    JOIN registered_children AS c ON g.child_id = c.id
+    LEFT JOIN (
+      SELECT l1.*
+      FROM locations l1
+      JOIN (
+        SELECT child_id, MAX(date_time) AS latest
+        FROM locations
+        GROUP BY child_id
+      ) l2 ON l1.child_id = l2.child_id AND l1.date_time = l2.latest
+    ) AS l ON c.id = l.child_id
+    WHERE c.parent_id = ?
+    ORDER BY g.created_at DESC
+  `;
+
+  db.query(sql, [parent.id], (err, rows) => {
+    if (err) {
+      console.error("Error fetching geofences:", err);
+      return res.status(500).send("Database error");
+    }
+
+    console.log("/geofence-view route triggered");
+    console.log("Fetched geofences:", rows);
+
+    res.render("pages/geofence-view", {
+      title: "View Geofences",
+      parent,
+      geofences: rows,
+    });
+  });
+});
+
+
 
 app.use((req, res) => {
   res.status(404).render("pages/404", { title: "Page Not Found" });
