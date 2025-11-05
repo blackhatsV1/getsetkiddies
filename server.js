@@ -106,6 +106,7 @@ app.get("/dashboard", (req, res) => {
           if (err) {
             console.error("Error fetching safezone:", err);
             child.safezone = "Not set";
+            child.outside_safezone = false;
           } else if (safezoneResults.length > 0 && safezoneResults[0].geofence_lat) {
             const geo = safezoneResults[0];
             // Check if coordinates match preset locations (rounded to 4 decimal places)
@@ -123,13 +124,65 @@ app.get("/dashboard", (req, res) => {
             } else {
               child.safezone = `Custom Location (${geo.geofence_radius}m radius)`;
             }
+
+            // Check if child is outside safezone
+            if (child.current_location && child.current_location !== "No location data") {
+              // Extract latitude and longitude from current_location
+              let childLat, childLng;
+              if (child.current_location.startsWith("Lat: ")) {
+                const coords = child.current_location.match(/Lat:\s*(-?\d+\.\d+),\s*Lng:\s*(-?\d+\.\d+)/);
+                if (coords) {
+                  childLat = parseFloat(coords[1]);
+                  childLng = parseFloat(coords[2]);
+                }
+              } else {
+                // For readable addresses, we need to get coordinates from locations table
+                const locationSql = "SELECT latitude, longitude FROM locations WHERE child_id = ? ORDER BY date_time DESC LIMIT 1";
+                db.query(locationSql, [child.id], (err, locResults) => {
+                  if (!err && locResults.length > 0) {
+                    childLat = parseFloat(locResults[0].latitude);
+                    childLng = parseFloat(locResults[0].longitude);
+                  }
+                  calculateDistance(child, childLat, childLng, geo.geofence_lat, geo.geofence_lng, geo.geofence_radius, resolve);
+                });
+                return; // Exit early, resolve will be called in calculateDistance
+              }
+              calculateDistance(child, childLat, childLng, geo.geofence_lat, geo.geofence_lng, geo.geofence_radius, resolve);
+            } else {
+              child.outside_safezone = false;
+              resolve(child);
+            }
           } else {
             child.safezone = "Not set";
+            child.outside_safezone = false;
+            resolve(child);
           }
-          resolve(child);
         });
       });
     });
+
+    function calculateDistance(child, childLat, childLng, geoLat, geoLng, radius, resolve) {
+      if (childLat && childLng) {
+        // Haversine formula to calculate distance
+        const R = 6371e3; // Earth's radius in meters
+        const φ1 = (childLat * Math.PI) / 180;
+        const φ2 = (geoLat * Math.PI) / 180;
+        const Δφ = ((geoLat - childLat) * Math.PI) / 180;
+        const Δλ = ((geoLng - childLng) * Math.PI) / 180;
+
+        const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                  Math.cos(φ1) * Math.cos(φ2) *
+                  Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        const distance = R * c; // Distance in meters
+        child.outside_safezone = distance > radius;
+        console.log(`Child ${child.id}: distance=${distance.toFixed(2)}m, radius=${radius}m, outside=${child.outside_safezone}`);
+      } else {
+        child.outside_safezone = false;
+      }
+      resolve(child);
+    }
 
     Promise.all(childrenWithGeofence)
       .then(children => {

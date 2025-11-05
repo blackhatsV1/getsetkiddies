@@ -39,6 +39,9 @@
                             <td><%= child.current_location %></td>
                             <td><%= child.safezone || 'Not set' %></td>
                             <td>
+                                <% if (child.outside_safezone) { %>
+                                    <span style="color: red; font-weight: bold;">⚠️ OUTSIDE SAFEZONE</span>
+                                <% } %>
                                 <button class="remove-btn" data-id="<%= child.id %>" data-name="<%= child.firstname %> <%= child.lastname %>">&minus;</button>
                             </td>
                         </tr>
