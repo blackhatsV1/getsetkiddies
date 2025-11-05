@@ -9,7 +9,11 @@ router.post("/", (req, res) => {
     return res.status(400).json({ message: "Missing fields" });
 
   const sql = `
+<<<<<<< HEAD
     INSERT INTO locations (child_id, latitude, longitude, readable_address, date_time)
+=======
+    INSERT INTO locations (child_id, latitude, longitude, readable_address, timestamp)
+>>>>>>> 1d1aac690c4a22f72957c16ed73a99aef00b2afc
     VALUES (?, ?, ?, ?, NOW())
   `;
   db.query(sql, [child_id, latitude, longitude, readable_address], (err) => {
