@@ -1,0 +1,80 @@
+<%- include('../partials/head') %>
+<body>  
+  <%- include('../partials/top-nav-parents') %>
+
+  <div class="main-container">
+    <%- include('../partials/side-nav-parents') %>
+
+    <main class="content">
+      <% if (parent) { %>
+        <p>Logged in as: <%= parent.firstname %> <%= parent.lastname %></p>
+      <% } %>
+
+      <h3>Set Geofence for Registered Children:</h3>
+
+      <table border="1" id="childrenTable" style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th>Firstname</th>
+            <th>Lastname</th>
+            <th>Age</th>
+            <th>Gender</th>
+            <th>Last Known Location</th>
+            <th>Date & Time</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% children.forEach(child => { %>
+            <tr 
+              data-child-id="<%= child.id %>"
+              data-lat="<%= child.latitude || '' %>"
+              data-lng="<%= child.longitude || '' %>"
+            >
+              <td><%= child.firstname %></td>
+              <td><%= child.lastname %></td>
+              <td><%= child.child_age %></td>
+              <td><%= child.child_gender %></td>
+              <td class="location-cell">
+                <% if (child.latitude && child.longitude) { %>
+                  <em>Loading address...</em>
+                <% } else { %>
+                  <em>No data</em>
+                <% } %>
+              </td>
+              <td>
+                <% if (child.date_time) { 
+                    const d = new Date(child.date_time);
+                    const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+                    const weekday = days[d.getDay()];
+                %>
+                  <%= weekday %>, 
+                  <%= d.toLocaleDateString('en-PH') %>, 
+                  <%= d.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' }) %>
+                <% } else { %>
+                  <em>—</em>
+                <% } %>
+              </td>
+              <td>
+                <button class="setGeoBtn"
+                  data-child-id="<%= child.id %>"
+                  data-child-name="<%= child.firstname %>"
+                  data-lat="<%= child.latitude || '' %>"
+                  data-lng="<%= child.longitude || '' %>">
+                  Set Geofence
+                </button>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+
+
+
+      <%- include('../partials/geofence-map') %>
+    </main>
+  </div>
+
+  <%- include('../partials/footer') %>
+  <script src="/js/geofenceSetup.js"></script>
+</body>

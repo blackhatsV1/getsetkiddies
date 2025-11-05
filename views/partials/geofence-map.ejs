@@ -1,0 +1,55 @@
+<!-- Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+  #mapContainer {
+    margin-top: 20px;
+    width: 100%;
+    position: relative;
+  }
+
+  #map {
+    height: 400px;
+    width: 100%;
+    border: 1px solid #222;
+    border-radius: 8px;
+  }
+
+  #geoInfo {
+    margin-top: 15px;
+    font-size: 15px;
+  }
+
+  #saveGeofence {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  #saveGeofence:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+</style>
+
+<div id="geoInfo"></div>
+
+<div id="geofenceInputs">
+  <label>Geofence Name: 
+    <input type="text" id="geoName" placeholder="Home / School" />
+  </label><br>
+  <label>Radius (meters): 
+    <input type="number" id="radius" value="100" min="10" />
+  </label><br>
+  <button id="saveGeofence" disabled>Save Geofence</button>
+</div>
+
+<div id="mapContainer">
+  <div id="map"></div>
+</div>
+
