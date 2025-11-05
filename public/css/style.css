@@ -102,8 +102,38 @@ body {
     background-color: #f5f5f5;
 }
 
+.outside-safezone:hover {
+    background-color: #ffe4b3 !important;
+}
+
+/* Tooltip Styles */
+[data-tooltip] {
+    position: relative;
+}
+
+[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 16px;
+    white-space: nowrap;
+    z-index: 1000;
+    pointer-events: none;
+}
+
 .kids-table tbody tr:last-child td {
     border-bottom: none;
+}
+
+/* Outside Safezone Row Styles */
+.outside-safezone {
+    background-color: #ffe4b3;
 }
 
 /* Track Button Styles */

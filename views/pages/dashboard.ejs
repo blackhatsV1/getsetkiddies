@@ -31,17 +31,19 @@
                 </thead>
                 <tbody>
                     <% children.forEach(child => { %>
-                        <tr>
+                        <tr class="<%= child.outside_safezone ? 'outside-safezone' : '' %>" data-tooltip="<%= child.outside_safezone ? `Warning: ${child.firstname} ${child.lastname} is outside the safezone.` : '' %>">
                             <td><%= child.firstname %> <%= child.lastname %></td>
                             <td><%= child.child_age %></td>
                             <td><%= child.child_gender %></td>
                             <td><%= new Date(child.date_registered).toLocaleDateString() %></td>
                             <td><%= child.current_location %></td>
-                            <td><%= child.safezone || 'Not set' %></td>
-                            <td>
+                            <td data-tooltip="<%= child.outside_safezone ? `Warning: ${child.firstname} ${child.lastname} is outside the safezone.` : '' %>">
+                                <%= child.safezone || 'Not set' %>
                                 <% if (child.outside_safezone) { %>
-                                    <span style="color: red; font-weight: bold;">⚠️ OUTSIDE SAFEZONE</span>
+                                    <span style="color: red; font-weight: bold;">⚠️</span>
                                 <% } %>
+                            </td>
+                            <td>
                                 <button class="remove-btn" data-id="<%= child.id %>" data-name="<%= child.firstname %> <%= child.lastname %>">&minus;</button>
                             </td>
                         </tr>
