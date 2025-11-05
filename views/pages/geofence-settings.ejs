@@ -1,0 +1,172 @@
+<%- include('../partials/head') %>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<body>
+  <!-- Include top navigation -->
+  <%- include('../partials/top-nav-parents') %>
+
+  <div class="main-container">
+    <%- include('../partials/side-nav-parents') %>
+
+    <main class="content">
+        <div class="geofence-container">
+            <form id="geofence-form" class="geofence-form">
+            <div class="form-group">
+                <label for="child-select">Select Child:</label>
+                <select id="child-select" name="child-select" required>
+                    <option value="">Choose a child...</option>
+                    <% if (typeof children !== 'undefined' && children.length > 0) { %>
+                        <% children.forEach(child => { %>
+                            <option value="<%= child.id %>"><%= child.firstname %> <%= child.lastname %></option>
+                        <% }); %>
+                    <% } %>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="location-select">Select Location:</label>
+                <select id="location-select" name="location-select">
+                    <option value="">Choose a preset location...</option>
+                    <option value="university-of-iloilo">University of Iloilo</option>
+                    <option value="tubungan-public-market">Tubungan Public Market</option>
+                    <option value="leon-public-market">Leon Public Market</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="latitude">Latitude:</label>
+                <input type="text" id="latitude" name="latitude" placeholder="Enter latitude" />
+            </div>
+
+            <div class="form-group">
+                <label for="longitude">Longitude:</label>
+                <input type="text" id="longitude" name="longitude" placeholder="Enter longitude" />
+            </div>
+
+            <div class="form-group">
+                <label for="radius">Radius (meters):</label>
+                <input type="number" id="radius" name="radius" placeholder="Enter radius in meters" min="50" max="5000" />
+            </div>
+
+            <button type="submit" class="submit-btn">Save Safezone</button>
+        </form>
+
+        <div id="message" class="message"></div>
+
+        <div id="map" class="map-container"></div>
+    </main>
+  </div>
+  <%- include('../partials/footer') %>
+
+  <script>
+    // Initialize map
+    const map = L.map('map').setView([10.7147, 122.5621], 13); // Default to University of Iloilo
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    let geofenceCircle = null;
+
+    document.getElementById('location-select').addEventListener('change', function() {
+        const selectedValue = this.value;
+        const latitudeInput = document.getElementById('latitude');
+        const longitudeInput = document.getElementById('longitude');
+
+        // Preset coordinates (you can adjust these with actual coordinates)
+        const presets = {
+            'university-of-iloilo': { lat: '10.7147', lng: '122.5621' },
+            'tubungan-public-market': { lat: '10.8322', lng: '122.4156' },
+            'leon-public-market': { lat: '10.7833', lng: '122.3833' }
+        };
+
+        if (selectedValue && presets[selectedValue]) {
+            latitudeInput.value = presets[selectedValue].lat;
+            longitudeInput.value = presets[selectedValue].lng;
+
+            // Update map view
+            map.setView([presets[selectedValue].lat, presets[selectedValue].lng], 15);
+        } else {
+            latitudeInput.value = '';
+            longitudeInput.value = '';
+        }
+    });
+
+    document.getElementById('latitude').addEventListener('input', updateMap);
+    document.getElementById('longitude').addEventListener('input', updateMap);
+    document.getElementById('radius').addEventListener('input', updateMap);
+
+    function updateMap() {
+        const lat = parseFloat(document.getElementById('latitude').value);
+        const lng = parseFloat(document.getElementById('longitude').value);
+        const radius = parseFloat(document.getElementById('radius').value);
+
+        if (lat && lng) {
+            map.setView([lat, lng], 15);
+
+            if (geofenceCircle) {
+                map.removeLayer(geofenceCircle);
+            }
+
+            if (radius) {
+                geofenceCircle = L.circle([lat, lng], {
+                    color: 'red',
+                    fillColor: '#f03',
+                    fillOpacity: 0.2,
+                    radius: radius
+                }).addTo(map);
+            }
+        }
+    }
+
+    document.getElementById('geofence-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const childId = document.getElementById('child-select').value;
+        const latitude = document.getElementById('latitude').value;
+        const longitude = document.getElementById('longitude').value;
+        const radius = document.getElementById('radius').value;
+        const messageDiv = document.getElementById('message');
+
+        if (!childId || !latitude || !longitude || !radius) {
+            messageDiv.innerHTML = '<p style="color: red;">Please fill in all fields.</p>';
+            return;
+        }
+
+        // Send data to server
+        fetch('/api/geofence/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                childId: childId,
+                latitude: latitude,
+                longitude: longitude,
+                radius: radius
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert('Safezone settings saved successfully!');
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while saving safezone settings.');
+        });
+
+        // Clear the form
+        this.reset();
+
+        // Remove geofence circle from map
+        if (geofenceCircle) {
+            map.removeLayer(geofenceCircle);
+            geofenceCircle = null;
+        }
+    });
+  </script>
+</body>

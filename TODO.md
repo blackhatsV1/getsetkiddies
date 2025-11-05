@@ -1,0 +1,11 @@
+- [x] Update side-nav-parents.ejs: Add a child selection dropdown when on track-child page, populated with parent's children.
+- [x] Update server.js /track-child: Fetch parent's children and pass to view; if child_id query param, fetch that child's last location.
+- [x] Update track-child.ejs: Display selected child's name and location if available.
+- [x] Update locationselect.js: Instead of geolocation, display the fetched child's location on map; remove save functionality as locations come from Arduino.
+- [x] Add GET route in api/locations.js to fetch last location for a child.
+- [x] Alter parents table: Add description column.
+- [x] Add /profile GET route in server.js: Fetch parent and children data, render profile.ejs.
+- [x] Create profile.ejs content: Profile pic, name, phone, email, description textarea, kids list.
+- [x] Add API endpoint in parents.js for updating profile (description and pic).
+- [x] Update CSS for profile page styling.
+- [x] Test the profile page functionality.

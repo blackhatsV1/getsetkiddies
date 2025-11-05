@@ -1,0 +1,43 @@
+<style>
+  span {
+    color: yellow;
+  }
+</style>
+
+<header class="top-nav">
+  <h1>GetSet <span>Kiddies</span></h1>
+  <p>Welcome, <%= parent.firstname.charAt(0).toUpperCase() + parent.firstname.slice(1) %> <%= parent.lastname.charAt(0).toUpperCase() + parent.lastname.slice(1) %>!</p>
+  <nav>
+    <a href="/dashboard">Home</a>
+    <a href="#" id="logoutbtn">Logout</a>
+    <a href="/about">About</a>
+  </nav>
+
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const logoutBtn = document.getElementById("logoutbtn");
+
+    logoutBtn.addEventListener("click", async (e) => {
+      e.preventDefault(); 
+
+      const confirmed = confirm("Are you sure you want to logout?");
+      if (!confirmed) return; 
+
+      try {
+        const res = await fetch("/api/parents/logout", {
+          method: "GET",
+          credentials: "include"
+        });
+
+        alert("You have been logged out successfully!");
+
+        window.location.href = "/"; 
+      } catch (err) {
+        console.error("Error logging out:", err);
+        alert("Error logging out.");
+      }
+    });
+  });
+</script>
+
+</header>

@@ -1,0 +1,478 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+/* Top Navigation */
+.top-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background-color: #333;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  z-index: 1000;
+}
+
+.top-nav a {
+  color: white;
+  text-decoration: none;
+  margin-left: 15px;
+  margin-right: 30px;
+}
+
+/* Layout for side + main content */
+.main-container {
+  display: flex;
+  margin-top: 60px; /* space for top nav */
+}
+
+/* Side Navigation */
+.side-nav {
+  width: 200px;
+  height: calc(100vh - 60px);
+  background-color: #222;
+  position: fixed;
+  top: 60px;
+  left: 0;
+  padding-top: 20px;
+}
+
+.side-nav a {
+  display: block;
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px;
+}
+
+.side-nav a:hover {
+  background-color: #444;
+}
+
+/* Content Area */
+.content {
+  margin-left: 200px;
+  padding: 20px;
+  flex: 1;
+}
+
+.register_child {
+  display: inline-block;     
+  /* border: 1px solid black; */
+  text-align: left;          
+  margin: 0 auto;            
+  padding: 10px;            
+}
+
+#logoutbtn{
+    color: orange;
+    font-weight:
+    bold; float:
+    right;
+}
+
+/* Kids Table Styles */
+.kids-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.kids-table th,
+.kids-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.kids-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    color: #333;
+}
+
+.kids-table tbody tr:hover {
+    background-color: #f5f5f5;
+}
+
+.kids-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Track Button Styles */
+.track-btn {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.track-btn:hover {
+    background-color: #0056b3;
+    text-decoration: none;
+    color: white;
+}
+
+/* Dashboard Header */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.geofence-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.geofence-btn:hover {
+    background-color: #218838;
+    text-decoration: none;
+    color: white;
+}
+
+/* Dashboard Actions */
+.dashboard-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.action-btn {
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.add-kids-btn {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.add-kids-btn:hover {
+    background-color: #138496;
+    text-decoration: none;
+    color: white;
+}
+
+/* Geofence Settings Styles */
+.geofence-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.geofence-form {
+    width: 300px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.map-container {
+    flex: 1;
+    height: 500px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+.submit-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+.submit-btn:hover {
+    background-color: #218838;
+}
+
+.message {
+    margin-top: 20px;
+    text-align: center;
+}
+
+/* Remove Button Styles */
+.remove-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
+}
+
+.remove-btn:hover {
+    background-color: #c82333;
+}
+
+/* Profile Page Styles */
+.profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profile-main {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+    margin-bottom: 30px;
+}
+
+.profile-pic-section {
+    flex-shrink: 0;
+    text-align: center;
+}
+
+.profile-pic-container {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 4px solid #ddd;
+    overflow: hidden;
+    margin: 0 auto 10px auto;
+}
+
+.profile-pic {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.upload-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.upload-btn:hover {
+    background-color: #0056b3;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.info-group {
+    margin-bottom: 20px;
+}
+
+.info-group label {
+    display: block;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.info-group h2 {
+    margin: 0;
+    color: #333;
+    font-size: 24px;
+}
+
+.info-group p {
+    margin: 0;
+    color: #666;
+    font-size: 16px;
+}
+
+.info-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.save-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 10px;
+    transition: background-color 0.3s;
+}
+
+.save-btn:hover {
+    background-color: #218838;
+}
+
+.children-section {
+    border-top: 1px solid #ddd;
+    padding-top: 20px;
+}
+
+.children-section h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.children-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.children-list li {
+    background-color: #fff;
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+/* Dashboard Registration Form Styles */
+.register-form-container {
+    margin-top: 20px;
+}
+
+.register-form-container .register_card {
+    background-color: white;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 40px 35px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.register-form-container .register_card h2 {
+    color: green;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 24px;
+}
+
+.register-form-container .input-group {
+    background-color: white;
+    position: relative;
+    width: 100%;
+    margin-bottom: 25px;
+    border: none;
+    border-radius: 10px;
+}
+
+.register-form-container .input-group input,
+.register-form-container .input-group select {
+    width: 100%;
+    padding: 14px 12px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    outline: none;
+    font-size: 16px;
+    background: none;
+    box-sizing: border-box;
+}
+
+.register-form-container .input-group label {
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    color: rgb(95, 95, 95);
+    background: white;
+    transition: 0.3s ease;
+    padding: 0 5px;
+    pointer-events: none;
+}
+
+.register-form-container .input-group input:focus + label,
+.register-form-container .input-group input:not(:placeholder-shown) + label,
+.register-form-container .input-group select:focus + label {
+    top: -10px;
+    left: 10px;
+    font-size: 12px;
+    color: black;
+}
+
+.register-form-container button {
+    background-color: rgb(27, 28, 46);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+.register-form-container button:hover {
+    background-color: #8b3c8b;
+}
+

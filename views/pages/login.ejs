@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Parent Login</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <style>
+  body {
+    font-family: "Roboto", sans-serif;
+    background-color: grey;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+  }
+
+  .logo-container {
+    text-align: center;
+  }
+
+  .map-pin {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    background-color: green;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    margin: 0 auto 15px;
+  }
+
+  .pin-center {
+    position: absolute;
+    top: 25%;
+    left: 25%;
+    width: 60px;
+    height: 60px;
+    background-color: white;
+    border-radius: 50%;
+    transform: rotate(45deg);
+  }
+
+  .logo-text {
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  .white-text {
+    color: rgb(27, 28, 46);
+  }
+
+  .yellow-text {
+    color: yellow;
+  }
+
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* centers all children horizontally */
+    background-color: white;
+    border-radius: 20px;
+    width: 380px;
+    padding: 40px 35px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .login-form h1 {
+    color: rgb(41, 41, 41);
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .input-group {
+    position: relative;
+    width: 100%; /* ensures full width alignment */
+    margin-bottom: 25px;
+  }
+
+  .input-group input {
+    width: 100%;
+    padding: 14px 12px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    outline: none;
+    font-size: 16px;
+    background: none;
+    box-sizing: border-box;
+    display: block;
+    text-align: left;
+  }
+
+  .input-group label {
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    color: #888;
+    background: white;
+    transition: 0.3s ease;
+    padding: 0 5px;
+    pointer-events: none;
+  }
+
+  .input-group input:focus + label,
+  .input-group input:not(:placeholder-shown) + label {
+    top: -10px;
+    left: 10px;
+    font-size: 12px;
+    color: #692e69;
+  }
+
+  .login-form button {
+    background-color: rgb(41, 41, 41);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%; /* makes the button align with inputs */
+    transition: background-color 0.3s;
+  }
+
+  .login-form button:hover {
+    background-color: rgb(27, 28, 46);
+  }
+
+  .login-form p {
+    text-align: center;
+    margin-top: 15px;
+    color: #333;
+  }
+
+  .login-form a {
+    color: #ff9100;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .login-form a:hover {
+    text-decoration: underline;
+  }
+</style>
+
+  </head>
+  <body>
+    <div class="logo-container">
+      <div class="map-pin">
+        <div class="pin-center"></div>
+      </div>
+      <h1 class="logo-text">
+        <span class="white-text">GetSet</span> <span class="yellow-text">Kiddies</span>
+      </h1>
+    </div>
+
+    <form action="/api/parents/login" method="POST" class="login-form">
+      <h1>Parent Login</h1>
+
+      <div class="input-group">
+        <input type="email" name="email" id="email" placeholder=" " required />
+        <label for="email">Email</label>
+      </div>
+
+      <div class="input-group">
+        <input type="password" name="password" id="password" placeholder=" " required />
+        <label for="password">Password</label>
+      </div>
+
+      <button type="submit">Login</button>
+      <p>No account? <a href="/register">Register here</a></p>
+    </form>
+  </body>
+</html>

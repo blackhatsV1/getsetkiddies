@@ -1,0 +1,195 @@
+<%- include('../partials/head') %>
+<style>
+  body {
+    font-family: "Roboto", sans-serif;
+    background-color: grey;
+    margin: 0;
+    padding: 0;
+  }
+
+  .main-container {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  .content {
+    flex: 1;
+    margin-top: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 40px 20px;
+  }
+
+  .register_card {
+    background-color: white;
+    border-radius: 20px;
+    width: 400px;
+    margin: 0 auto;
+    padding: 40px 35px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .register_card h1 {
+    color: green;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .input-group {
+    background-color: white;
+    position: relative;
+    width: 100%;
+    margin-bottom: 25px;
+    border: none;
+    border-radius: 10px;
+  }
+
+  .input-group input,
+  .input-group select {
+    width: 100%;
+    padding: 14px 12px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    outline: none;
+    font-size: 16px;
+    background: none;
+    box-sizing: border-box;
+  }
+
+  .input-group label {
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    color: rgb(95, 95, 95);
+    background: white;
+    transition: 0.3s ease;
+    padding: 0 5px;
+    pointer-events: none;
+  }
+
+  .input-group input:focus + label,
+  .input-group input:not(:placeholder-shown) + label,
+  .input-group select:focus + label {
+    top: -10px;
+    left: 10px;
+    font-size: 12px;
+    color: black;
+  }
+
+  button {
+    background-color: rgb(27, 28, 46);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    transition: background-color 0.3s;
+  }
+
+  button:hover {
+    background-color: #8b3c8b;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("/api/parents/current", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.parent) {
+          const parent = data.parent;
+          document.getElementById("parent_id").value = parent.id;
+          document.getElementById("parent_email").value = parent.email;
+          document.getElementById("parent_number").value = parent.phone_number;
+          document.getElementById("parent_home_address").value = parent.home_address;
+        }
+      })
+      .catch((err) => console.error("Error fetching parent:", err));
+
+    const form = document.getElementById("childForm");
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      fetch("/api/children/register", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+        .then((res) => res.json())
+        .then((result) => {
+          if (result.message) {
+            alert("Child registered successfully!");
+            form.reset();
+          } else {
+            alert("Failed to register child.");
+          }
+        })
+        .catch((err) => {
+          console.error("Error:", err);
+          alert("Error registering child.");
+        });
+    });
+  });
+</script>
+
+<body>
+  <!-- Navigation -->
+  <%- include('../partials/top-nav-parents') %>
+
+  <div class="main-container">
+    <%- include('../partials/side-nav-parents') %>
+
+    <main class="content">
+      <div class="register_card">
+        <h1>Register Your Child</h1>
+
+        <form id="childForm">
+          <input type="hidden" id="parent_id" name="parent_id" />
+          <input type="hidden" id="parent_email" name="parent_email" />
+          <input type="hidden" id="parent_number" name="parent_number" />
+          <input type="hidden" id="parent_home_address" name="parent_home_address" />
+
+          <div class="input-group">
+            <input type="text" name="firstname" id="firstname" placeholder=" " required />
+            <label for="firstname">Child First Name</label>
+          </div>
+
+          <div class="input-group">
+            <input type="text" name="lastname" id="lastname" placeholder=" " required />
+            <label for="lastname">Child Last Name</label>
+          </div>
+
+          <div class="input-group">
+            <input type="number" name="child_age" id="child_age" placeholder=" " required />
+            <label for="child_age">Child Age</label>
+          </div>
+
+          <div class="input-group">
+            <select name="child_gender" id="child_gender" required>
+              <option value="" disabled selected hidden></option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+            <label for="child_gender">Child Gender</label>
+          </div>
+
+          <button type="submit">Register Child</button>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <%- include('../partials/footer') %>
+</body>

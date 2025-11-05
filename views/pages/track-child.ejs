@@ -1,0 +1,62 @@
+<%- include('../partials/head') %>
+<body>
+  <!-- Include top navigation -->
+  <%- include('../partials/top-nav-parents') %>
+
+  <div class="main-container">
+    <%- include('../partials/side-nav-parents') %>
+
+    <main class="content">
+        <h1><%= title %></h1>
+
+        <% if (children && children.length > 0) { %>
+          <div class="child-selector" style="margin-bottom: 20px;">
+            <label for="child-select">Select Child:</label>
+            <select id="child-select">
+              <option value="">-- Select a child --</option>
+              <% children.forEach(child => { %>
+                <option value="<%= child.id %>" <%= (selectedChild && selectedChild.id == child.id) ? 'selected' : '' %>>
+                  <%= child.firstname %> <%= child.lastname %>
+                </option>
+              <% }); %>
+            </select>
+          </div>
+        <% } %>
+
+        <% if (selectedChild) { %>
+          <p>Tracking: <strong><%= selectedChild.firstname %> <%= selectedChild.lastname %></strong></p>
+          <% if (childLocation) { %>
+            <p>Last Location: <%= childLocation.readable_address || `Lat: ${childLocation.latitude}, Lng: ${childLocation.longitude}` %> (Updated: <%= new Date(childLocation.date_time).toLocaleString() %>)</p>
+          <% } else { %>
+            <p>No location data available for this child.</p>
+          <% } %>
+        <% } else { %>
+          <p>Please select a child to track.</p>
+        <% } %>
+
+        <script>
+          window.selectedChild = <%- JSON.stringify(selectedChild || null) %>;
+          window.childLocation = <%- JSON.stringify(childLocation || null) %>;
+        </script>
+        <%- include('../partials/locationselect') %>
+
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            const childSelect = document.getElementById('child-select');
+            if (childSelect) {
+              childSelect.addEventListener('change', function() {
+                const childId = this.value;
+                if (childId) {
+                  window.location.href = `/track-child?child_id=${childId}`;
+                } else {
+                  window.location.href = '/track-child';
+                }
+              });
+            }
+          });
+        </script>
+    </main>
+  </div>
+  <%- include('../partials/footer') %>
+</body>
+
