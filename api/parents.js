@@ -1,4 +1,3 @@
-// api/parents.js
 import express from "express";
 import db from "../db/connection.js";
 import bodyParser from "body-parser";
@@ -67,8 +66,10 @@ router.get("/", (req, res) => {
   const parent = req.session.parent;
   if (!parent) return res.redirect("/login");
 
-  const sql = `SELECT id, firstname, lastname, child_age, child_gender
-               FROM registered_children WHERE parent_id = ?`;
+  const sql = `SELECT id, firstname, lastname, child_age, child_gender, date_registered
+               FROM registered_children
+               WHERE parent_id = ?
+               ORDER BY date_registered DESC`; // latest first
 
   db.query(sql, [parent.id], (err, results) => {
     if (err) {

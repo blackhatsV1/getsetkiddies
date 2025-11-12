@@ -1,4 +1,4 @@
-// api/geofences.js
+
 import express from "express";
 import db from "../db/connection.js";
 
@@ -7,7 +7,7 @@ const router = express.Router();
 /* -----------------------------
    PAGE: Geofence Setup
 ----------------------------- */
-// api/geofences.js
+
 router.get("/setup", (req, res) => {
   if (!req.session.parent) return res.redirect("/login");
 
@@ -55,7 +55,7 @@ router.get("/setup", (req, res) => {
 router.post("/add", (req, res) => {
   const { child_id, name, latitude, longitude, radius } = req.body;
 
-  // First check if the child already has a geofence
+  
   const checkSql = "SELECT id FROM geofences WHERE child_id = ?";
   db.query(checkSql, [child_id], (err, results) => {
     if (err) {
@@ -64,7 +64,7 @@ router.post("/add", (req, res) => {
     }
 
     if (results.length > 0) {
-      // Update existing geofence
+      
       const updateSql = `
         UPDATE geofences
         SET name = ?, latitude = ?, longitude = ?, radius = ?, updated_at = NOW()
@@ -79,7 +79,7 @@ router.post("/add", (req, res) => {
       });
 
     } else {
-      // Insert new geofence
+      
       const insertSql = `
         INSERT INTO geofences (child_id, name, latitude, longitude, radius, created_at)
         VALUES (?, ?, ?, ?, ?, NOW())

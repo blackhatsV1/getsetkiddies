@@ -1,4 +1,4 @@
-// api/locations.js
+
 import express from "express";
 import db from "../db/connection.js";
 

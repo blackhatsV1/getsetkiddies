@@ -1,9 +1,9 @@
 <%- include('../partials/head') %>
 <body>  
 <style>
-  /* Content Area */
+  
   .content {
-    margin-left: 200px; /* space for side-nav */
+    margin-left: 200px; 
     padding: 30px 40px;
     background-color: #ffffff;
     border-radius: 0 20px 20px 0;
@@ -20,8 +20,7 @@
     color: #692e69;
     margin-bottom: 20px;
   }
-
-  /* Table Styling */
+    
   table {
     width: 100%;
     border-collapse: collapse;
@@ -52,7 +51,7 @@
     color: #888;
   }
 
-  /* Buttons */
+  
   button.setGeoBtn {
     background-color: #692e69;
     color: white;
@@ -68,7 +67,7 @@
     background-color: #8b3c8b;
   }
 
-  /* Responsive */
+  
   @media (max-width: 900px) {
     .content {
       margin-left: 0;
@@ -119,11 +118,11 @@
     <%- include('../partials/side-nav-parents') %>
 
     <main class="content">
+      <h1 class="themed-heading">Setup Geofence</h1>
       <% if (parent) { %>
         <p>Logged in as: <%= parent.firstname %> <%= parent.lastname %></p>
       <% } %>
 
-      <h3>Set Geofence for Registered Children:</h3>
 
       <table border="1" id="childrenTable" style="width: 100%; border-collapse: collapse;">
         <thead>
