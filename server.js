@@ -74,11 +74,11 @@ app.get("/geofence-setup", (req, res) => res.redirect("/api/geofences/setup"));
 app.get("/geofence-view", (req, res) => { 
   if (!req.session.parent) return res.redirect("/login"); 
   const parent = req.session.parent; 
-  const sql = SELECT g.id AS geofence_id, g.name AS geofence_name, g.latitude AS fence_lat, g.longitude 
+  const sql = `SELECT g.id AS geofence_id, g.name AS geofence_name, g.latitude AS fence_lat, g.longitude 
     AS fence_lng, g.radius, c.id AS child_id, c.firstname, c.lastname, l.latitude 
       AS child_lat, l.longitude AS child_lng, l.date_time FROM geofences AS g JOIN registered_children 
         AS c ON g.child_id = c.id LEFT JOIN ( SELECT l1.* FROM locations l1 JOIN ( SELECT child_id, MAX(date_time) AS latest 
-          FROM locations GROUP BY child_id ) l2 ON l1.child_id = l2.child_id AND l1.date_time = l2.latest ) AS l ON c.id = l.child_id WHERE c.parent_id = ? ORDER BY g.created_at DESC ; 
+          FROM locations GROUP BY child_id ) l2 ON l1.child_id = l2.child_id AND l1.date_time = l2.latest ) AS l ON c.id = l.child_id WHERE c.parent_id = ? ORDER BY g.created_at DESC` ; 
   
   db.query(sql, [parent.id], (err, rows) => { 
     if (err) { console.error("Error fetching geofences:", err); 
