@@ -5,35 +5,46 @@ import dotenv from "dotenv";
 import path from "path"; 
 import { fileURLToPath } from "url"; 
 import session from "express-session"; 
-import MySQLStore from "express-mysql-session"; 
 import db from "./db/connection.js"; 
 import parentRoutes from "./api/parents.js"; 
 import childRoutes from "./api/children.js"; 
 import locationRoutes from "./api/locations.js"; 
 import geofenceRoutes from "./api/geofences.js"; 
 
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const MySQLStore = require("express-mysql-session")(session);
+
+
 dotenv.config(); const app = express(); 
 app.use(cors()); app.use(bodyParser.json()); 
 app.use(express.urlencoded({ extended: true })); 
 
 const isProduction = process.env.NODE_ENV === "production"; 
-const sessionStore = new MySQLStore({ 
-  host: process.env.DB_HOST, 
-  port: process.env.DB_PORT || 3306, 
-  user: process.env.DB_USER, 
-  password: process.env.DB_PASS, 
-  database: process.env.DB_NAME, 
-  ssl: isProduction ? { rejectUnauthorized: true } : undefined, }); 
+const sessionStore = new MySQLStore({
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT || 3306,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  ssl: isProduction ? { rejectUnauthorized: true } : undefined,
+});
 
-app.use( session({ 
-  key: "session_cookie_name", 
-  secret: process.env.SESSION_SECRET, 
-  store: sessionStore, resave: false, 
-  saveUninitialized: false, 
-  cookie: { 
-    secure: isProduction, 
-    httpOnly: true, maxAge: 1000 * 60 * 60, }, 
-}) ); 
+app.use(
+  session({
+    key: "session_cookie_name",
+    secret: process.env.SESSION_SECRET,
+    store: sessionStore,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: isProduction,
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60,
+    },
+  })
+);
+
 
 const __filename = fileURLToPath(import.meta.url); 
 const __dirname = path.dirname(__filename); 
