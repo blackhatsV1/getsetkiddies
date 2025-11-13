@@ -55,7 +55,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const lat = parseFloat(btn.dataset.lat);
       const lng = parseFloat(btn.dataset.lng);
 
-      
+      // If no last-known location, inform parent then offer to go to Track Child
+      if (isNaN(lat) || isNaN(lng)) {
+        alert("No location record for this child.");
+        const go = confirm(
+          "This child has no recorded location. Proceed to Track Child page to 'Show on Map' and 'Scan for Current Location'?\n\nPress Proceed to go, or Cancel to stay."
+        );
+        if (go) {
+          
+          window.location.href = `/track-child?child_id=${encodeURIComponent(activeChildId)}`;
+        }
+        return;
+      }
+
       if (marker) map.removeLayer(marker);
       if (circle) map.removeLayer(circle);
 
@@ -68,6 +80,13 @@ document.addEventListener("DOMContentLoaded", () => {
           Last known location: ${lat.toFixed(5)}, ${lng.toFixed(5)}.
           <br><h4>Click the map to adjust center.</h4>
         `;
+
+        
+        const mapContainer = document.getElementById("map");
+        if (mapContainer) {
+          mapContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+          setTimeout(() => { try { map.invalidateSize(); } catch (e) {} }, 300);
+        }
       } else {
         map.setView([10.3157, 123.8854], 13);
         infoEl.innerHTML = `<b>Setting geofence for ${activeChildName}</b><br><h3>No last known location — click on the map to choose center.</h3>`;
@@ -130,10 +149,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }),
       });
 
-
       const result = await res.json();
       if (res.ok) {
-        alert(`Geofence '${name}' saved for ${activeChildName}`);
+        
+        const proceed = confirm(`Geofence '${name}' saved for ${activeChildName}.\n\nGo to Geofence Overview now? Click cancel to stay on this page.`);
+        if (proceed) {
+          window.location.href = "/geofence-view";
+        } else {
+          
+          if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+          window.location.href = window.location.pathname + window.location.search;
+        }
       } else {
         alert(result.error || "Failed to save geofence");
       }

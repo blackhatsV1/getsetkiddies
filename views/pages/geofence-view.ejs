@@ -175,19 +175,29 @@
   <style>
   
   .geo-notif {
-    width: 100%;
-    background: rgba(255,255,255,0.95);
-    color: #692e69;
-    border-left: 4px solid #ffb86b;
-    padding: 10px 14px;
-    border-radius: 8px;
-    margin: 12px 0;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.06);
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+  width: 100%;
+  background: #ff3b3b;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 10px;
+  margin: 20px 0;
+  padding: 16px;
+  box-shadow: 0 6px 15px rgba(255, 0, 0, 0.3);
+  border: 3px solid #fff;
+  animation: pulseAlert 1s infinite;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Pulse animation for visibility */
+@keyframes pulseAlert {
+  0% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 0, 0, 0.6); }
+  50% { transform: scale(1.03); box-shadow: 0 0 25px rgba(255, 0, 0, 0.8); }
+  100% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 0, 0, 0.6); }
+}
   </style>
   
   <%- include('../partials/footer') %>
@@ -335,20 +345,28 @@ async function renderGeofences() {
       message = `${formattedNames} are outside the geofence. Please check the Status column for details.`;
     }
 
-    notifEl.textContent = message;
-    notifEl.hidden = false;
+    const count = outsideList.length;
+    const displayMessage = count === 1
+      ? `Warning! 1 child is outside the geofence. Please check the Status column for details.`
+      : `Warning! ${count} children are outside the geofence. Please check the Status column for details.`;
 
-    
-    try {
-      const utter = new SpeechSynthesisUtterance(message);
-      // optional settings:
-      utter.rate = 1;
-      utter.pitch = 1;
-      speechSynthesis.cancel();
-      speechSynthesis.speak(utter);
-    } catch (e) {
-      console.warn("TTS not available:", e);
-    }
+    notifEl.textContent = displayMessage;
+    notifEl.hidden = false;
+    setTimeout(() => notifEl.hidden = true, 20000); 
+
+
+    (function speakCountOnly() {
+      const ttsMessage = displayMessage;
+      try {
+        const utter = new SpeechSynthesisUtterance(ttsMessage);
+        utter.rate = 0.95;
+        utter.pitch = 1.05;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utter);
+      } catch (e) {
+        console.warn("TTS not available:", e);
+      }
+    })();
   })();
 }
 

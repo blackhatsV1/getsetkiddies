@@ -166,6 +166,15 @@ document.addEventListener("DOMContentLoaded", () => {
         coordsEl.textContent = "";
         lastSeenEl.textContent = "";
         scanBtn.style.display = "inline-block";
+
+        // ensure the map is brought into view and re-rendered even when there are no records
+        const mapContainerEl = document.getElementById("mapContainer");
+        if (mapContainerEl) {
+          mapContainerEl.scrollIntoView({ behavior: "smooth", block: "start" });
+          setTimeout(() => {
+            try { map.invalidateSize(); } catch (err) { /* ignore */ }
+          }, 450);
+        }
         return;
       }
 
@@ -278,6 +287,15 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Error fitting bounds:", e);
       }
 
+      // scroll map into view and ensure Leaflet redraws after layout change
+      const mapContainerEl = document.getElementById("mapContainer");
+      if (mapContainerEl) {
+        mapContainerEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        // allow scroll/paint then tell Leaflet to recalculate size so map displays correctly
+        setTimeout(() => {
+          try { map.invalidateSize(); } catch (err) { /* ignore */ }
+        }, 450);
+      }
       
       const lastLocation = historyData[historyData.length - 1];
       const { latitude, longitude, readable_address, date_time } = lastLocation;
@@ -375,4 +393,19 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  
+  // If ?child_id=... is present, auto-click the corresponding Show on Map button
+  (function autoOpenFromQuery() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const pre = params.get("child_id");
+      if (!pre) return;
+      // small delay to ensure all handlers are attached
+      setTimeout(() => {
+        const btn = document.querySelector(`.trackBtn[data-child-id="${pre}"]`);
+        if (btn) btn.click();
+      }, 250);
+    } catch (e) { /* ignore */ }
+  })();
+  
 });
