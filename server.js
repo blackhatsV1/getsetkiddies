@@ -9,7 +9,6 @@ import session from "express-session";
 
 import db from "./db/connection.js";
 
-
 import parentRoutes from "./api/parents.js";
 import childRoutes from "./api/children.js";
 import locationRoutes from "./api/locations.js";
@@ -18,8 +17,6 @@ import geofenceRoutes from "./api/geofences.js";
 
 dotenv.config();
 const app = express();
-
-
 
 
 app.use(cors());
