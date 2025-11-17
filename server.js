@@ -57,7 +57,7 @@ app.use("/api/geofences", geofenceRoutes);
 
 
 app.get("/", (req, res) => {
-  res.render("pages/index", { title: "Child Tracker" });
+  res.render("pages/index", { title: "Get Set Kiddies" });
 });
 app.get("/about", (req, res) => {
   res.render("pages/about", { title: "About GetSet Kiddies" });
