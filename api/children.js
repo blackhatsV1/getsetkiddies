@@ -96,8 +96,8 @@ router.post("/delete", (req, res) => {
   });
 });
 
-/* -----------------------------------------
-   API: Get all children with last location & geofence status
+/* --------- --------------------------------
+   API children with last location, geofence status
 ----------------------------------------- */
 router.get("/list/all", (req, res) => {
   const parent = req.session.parent;

@@ -113,11 +113,11 @@
       <p>Logged in as: <%= parent.firstname %> <%= parent.lastname %></p>
     <h3>Check the Status column to see if child is within the Geofence.</h3>
 
-    <!-- notification (appears above the table) -->
+    
     <div id="geoNotification" class="geo-notif" role="status" aria-live="polite" hidden></div>
 
       <% if (geofences.length === 0) { %>
-        <p>No geofences have been added yet.</p>
+        <p>No Records yet. Go to <a href="/register-child">Add Child</a>.</p>
       <% } else { %>
         
 
@@ -315,7 +315,7 @@ async function renderGeofences() {
     if (bounds.isValid()) map.fitBounds(bounds);
   }
 
-  // build and display notification + text-to-speech
+
   (function showGeoSummary() {
     const notifEl = document.getElementById("geoNotification");
     if (!notifEl) return;
@@ -342,13 +342,13 @@ async function renderGeofences() {
       const o = outsideList[0];
       message = `${formattedNames} is outside the geofence (${o.dist.toFixed(0)} meters).`;
     } else {
-      message = `${formattedNames} are outside the geofence. Please check the Status column for details.`;
+      message = `${formattedNames} are outside the geofence. Check the Status column.`;
     }
 
     const count = outsideList.length;
     const displayMessage = count === 1
-      ? `Warning! 1 child is outside the geofence. Please check the Status column for details.`
-      : `Warning! ${count} children are outside the geofence. Please check the Status column for details.`;
+      ? `Warning! 1 child is outside the geofence. Check the Status column.`
+      : `Warning! ${count} children are outside the geofence. Check the Status column.`;
 
     notifEl.textContent = displayMessage;
     notifEl.hidden = false;
