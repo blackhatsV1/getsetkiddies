@@ -85,4 +85,17 @@ router.get("/", (req, res) => {
   });
 });
 
+/* -----------------------------------------
+   PAGE: Manage Children
+----------------------------------------- */
+router.get("/manage-children", (req, res) => {
+  const parent = req.session.parent;
+  if (!parent) return res.redirect("/login");
+
+  res.render("pages/manage-children", {
+    title: "Manage Children",
+    parent
+  });
+});
+
 export default router;

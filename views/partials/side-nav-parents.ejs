@@ -1,6 +1,65 @@
+<style>
+/* Dropdown container */
+.dropdown {
+  width: 100%;
+}
+
+/* Button style */
+.dropdown-btn {
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 12px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #fff;
+  font-family: inherit;
+}
+
+/* Hover effect */
+.dropdown-btn:hover {
+  background: #5a245a;
+}
+
+/* Hidden menu */
+.dropdown-content {
+  display: none;
+  flex-direction: column;
+  background-color: #4a1e4a;
+}
+
+.dropdown-content a {
+  padding: 10px 30px;
+  font-size: 15px;
+}
+
+/* Show when active */
+.dropdown.show .dropdown-content {
+  display: flex;
+}
+
+</style>
 <aside class="side-nav">
   <a href="/geofence-view">Dashboard</a>
-  <a href="/register-child">Add Child</a>
   <a href="/track-child">Track Child</a>
   <a href="/geofence-setup">Setup Geofence</a>
+
+  <div class="dropdown">
+    <button class="dropdown-btn">Manage Children ▾</button>
+    <div class="dropdown-content">
+      <a href="/register-child">Add Child</a>
+      <a href="/manage-children">Child Records</a>
+    </div>
+  </div>
 </aside>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const dropdown = document.querySelector(".dropdown");
+    const btn = document.querySelector(".dropdown-btn");
+
+    btn.addEventListener("click", () => {
+      dropdown.classList.toggle("show");
+    });
+  });
+</script>

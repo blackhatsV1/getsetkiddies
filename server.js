@@ -71,6 +71,14 @@ app.get("/register", (req, res) => {
   res.render("pages/register", { title: "Parent Registration" });
 });
 
+app.get("/manage-children", (req, res) => {
+  if (!req.session.parent) return res.redirect("/login");
+  res.render("pages/manage-children", {
+    title: "Get Set Kiddies - Manage Children",
+    parent: req.session.parent,
+  });
+});
+
 app.get("/dashboard", (req, res) => {
   if (!req.session.parent) return res.redirect("/login");
   res.render("pages/dashboard", {
