@@ -116,11 +116,11 @@
       <p>Logged in as: <%= parent.firstname %> <%= parent.lastname %></p>
     <h3>Check the Status column to see if child is within the Geofence.</h3>
 
-    <!-- notification (appears above the table) -->
+    
     <div id="geoNotification" class="geo-notif" role="status" aria-live="polite" hidden></div>
 
       <% if (geofences.length === 0) { %>
-        <p>No geofences have been added yet.</p>
+        <p>No Records yet. Go to <a href="/register-child">Add Child</a>.</p>
       <% } else { %>
         
 
@@ -193,19 +193,29 @@
   <style>
   
   .geo-notif {
-    width: 100%;
-    background: rgba(255,255,255,0.95);
-    color: #692e69;
-    border-left: 4px solid #ffb86b;
-    padding: 10px 14px;
-    border-radius: 8px;
-    margin: 12px 0;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.06);
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+  width: 100%;
+  background: #ff3b3b;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 10px;
+  margin: 20px 0;
+  padding: 16px;
+  box-shadow: 0 6px 15px rgba(255, 0, 0, 0.3);
+  border: 3px solid #fff;
+  animation: pulseAlert 1s infinite;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Pulse animation for visibility */
+@keyframes pulseAlert {
+  0% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 0, 0, 0.6); }
+  50% { transform: scale(1.03); box-shadow: 0 0 25px rgba(255, 0, 0, 0.8); }
+  100% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 0, 0, 0.6); }
+}
   </style>
   
   <%- include('../partials/footer') %>
@@ -323,7 +333,7 @@ async function renderGeofences() {
     if (bounds.isValid()) map.fitBounds(bounds);
   }
 
-  // build and display notification + text-to-speech
+
   (function showGeoSummary() {
     const notifEl = document.getElementById("geoNotification");
     if (!notifEl) return;
@@ -350,23 +360,31 @@ async function renderGeofences() {
       const o = outsideList[0];
       message = `${formattedNames} is outside the geofence (${o.dist.toFixed(0)} meters).`;
     } else {
-      message = `${formattedNames} are outside the geofence. Please check the Status column for details.`;
+      message = `${formattedNames} are outside the geofence. Check the Status column.`;
     }
 
-    notifEl.textContent = message;
+    const count = outsideList.length;
+    const displayMessage = count === 1
+      ? `Warning! 1 child is outside the geofence. Check the Status column.`
+      : `Warning! ${count} children are outside the geofence. Check the Status column.`;
+
+    notifEl.textContent = displayMessage;
     notifEl.hidden = false;
+    setTimeout(() => notifEl.hidden = true, 20000); 
 
-    
-    try {
-      const utter = new SpeechSynthesisUtterance(message);
-      // optional settings:
-      utter.rate = 1;
-      utter.pitch = 1;
-      speechSynthesis.cancel();
-      speechSynthesis.speak(utter);
-    } catch (e) {
-      console.warn("TTS not available:", e);
-    }
+
+    (function speakCountOnly() {
+      const ttsMessage = displayMessage;
+      try {
+        const utter = new SpeechSynthesisUtterance(ttsMessage);
+        utter.rate = 0.95;
+        utter.pitch = 1.05;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utter);
+      } catch (e) {
+        console.warn("TTS not available:", e);
+      }
+    })();
   })();
 }
 

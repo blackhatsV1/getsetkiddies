@@ -1,0 +1,139 @@
+<%- include('../partials/head') %>
+
+<body>
+<style>
+  .content {
+    margin-left: 200px; 
+    padding: 30px 40px;
+    background-color: #ffffff;
+    border-radius: 0 20px 20px 0;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    font-size: 14px;
+  }
+
+  table thead {
+    background-color: #692e69;
+    color: white;
+  }
+
+  table thead th {
+    padding: 12px 10px;
+    text-align: left;
+  }
+
+  table tbody td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  button.deleteBtn {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s;
+  }
+
+  button.deleteBtn:hover {
+    opacity: 0.8;
+  }
+</style>
+
+<%- include('../partials/top-nav-parents') %>
+
+  <div class="main-container">
+    <%- include('../partials/side-nav-parents') %>
+
+    <main class="content">
+    <h2 class="themed-heading">Manage Children</h2>
+    <p id="noChildrenMsg" style="display:none;">
+      No registered children found. Go to <a href="/register-child">Add Child</a>.
+    </p>
+
+    <table id="children-table">
+      <thead>
+        <tr>
+          <th>Firstname</th>
+          <th>Lastname</th>
+          <th>Age</th>
+          <th>Gender</th>
+          <th>Date Registered</th>
+          <th>Last Location</th>
+          <th>Geofence Status</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+  </main>
+
+<script>
+async function loadChildren() {
+  const res = await fetch("/api/children/list/all");
+  const data = await res.json();
+
+  const tbody = document.querySelector("#children-table tbody");
+  const msg = document.getElementById("noChildrenMsg");
+
+  tbody.innerHTML = "";
+
+  if (data.length === 0) {
+    msg.style.display = "block";
+    return;
+  } else {
+    msg.style.display = "none";
+  }
+
+  data.forEach(child => {
+    const lastLoc = child.readable_address ? child.readable_address : "No records yet";
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${child.firstname}</td>
+        <td>${child.lastname}</td>
+        <td>${child.child_age}</td>
+        <td>${child.child_gender}</td>
+        <td>${child.date_registered}</td>
+        <td>${lastLoc}</td>
+        <td>${child.geofence_status}</td>
+        <td>
+          <button class="deleteBtn" onclick="deleteChild(${child.id})">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+
+async function deleteChild(id) {
+  if (!confirm("Delete this child and all their data?")) return;
+
+  const res = await fetch("/api/children/delete", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ child_id: id })
+  });
+
+  const data = await res.json();
+  alert(data.message);
+  loadChildren();
+}
+
+loadChildren();
+</script>
+
+</body>

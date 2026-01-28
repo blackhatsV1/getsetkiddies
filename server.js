@@ -1,3 +1,28 @@
+<<<<<<< HEAD
+import express from "express";
+import bodyParser from "body-parser";
+import cors from "cors";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+import session from "express-session";
+
+import db from "./db/connection.js";
+
+import parentRoutes from "./api/parents.js";
+import childRoutes from "./api/children.js";
+import locationRoutes from "./api/locations.js";
+import geofenceRoutes from "./api/geofences.js";
+
+
+dotenv.config();
+const app = express();
+
+
+app.use(cors());
+app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
+=======
 import express from "express"; 
 import bodyParser from "body-parser"; 
 import cors from "cors"; 
@@ -19,6 +44,7 @@ const MySQLStore = require("express-mysql-session")(session);
 dotenv.config(); const app = express(); 
 app.use(cors()); app.use(bodyParser.json()); 
 app.use(express.urlencoded({ extended: true })); 
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
 
 const isProduction = process.env.NODE_ENV === "production"; 
 const sessionStore = new MySQLStore({
@@ -56,8 +82,16 @@ app.use("/api/locations", locationRoutes);
 app.use("/api/geofences", geofenceRoutes); 
 
 app.get("/", (req, res) => {
+<<<<<<< HEAD
+  res.render("pages/index", { title: "Get Set Kiddies" });
+});
+app.get("/about", (req, res) => {
+  res.render("pages/about", { title: "About GetSet Kiddies" });
+});
+=======
   res.render("pages/index", { title: "Child Tracker" }); 
 }); 
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
 
 app.get("/about", (req, res) => { 
   res.render("pages/about", { title: "About GetSet Kiddies" }); 
@@ -70,6 +104,14 @@ app.get("/login", (req, res) => {
 app.get("/register", (req, res) => { 
   res.render("pages/register", { title: "Parent Registration" }); 
 }); 
+
+app.get("/manage-children", (req, res) => {
+  if (!req.session.parent) return res.redirect("/login");
+  res.render("pages/manage-children", {
+    title: "Get Set Kiddies - Manage Children",
+    parent: req.session.parent,
+  });
+});
 
 app.get("/dashboard", (req, res) => {
   if (!req.session.parent) return res.redirect("/login"); 

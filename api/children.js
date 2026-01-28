@@ -74,4 +74,82 @@ router.post("/delete", async (req, res) => {
   }
 });
 
+/* --------- --------------------------------
+   API children with last location, geofence status
+----------------------------------------- */
+router.get("/list/all", (req, res) => {
+  const parent = req.session.parent;
+  if (!parent) return res.status(401).json({ message: "Login required" });
+
+  const sql = `
+    SELECT
+      c.id,
+      c.firstname,
+      c.lastname,
+      c.child_age,
+      c.child_gender,
+      c.date_registered,
+
+      -- Last location
+      l.latitude,
+      l.longitude,
+      l.readable_address,
+      l.date_time AS last_seen,
+
+      -- Geofence
+      g.id AS geofence_id,
+      g.latitude AS fence_lat,
+      g.longitude AS fence_lng,
+      g.radius
+    FROM registered_children AS c
+    LEFT JOIN (
+      SELECT child_id, latitude, longitude, readable_address, date_time
+      FROM locations
+      WHERE (child_id, date_time) IN (
+        SELECT child_id, MAX(date_time)
+        FROM locations
+        GROUP BY child_id
+      )
+    ) AS l ON c.id = l.child_id
+    LEFT JOIN geofences AS g ON c.id = g.child_id
+    WHERE c.parent_id = ?
+    ORDER BY c.date_registered DESC
+  `;
+
+  db.query(sql, [parent.id], (err, results) => {
+    if (err) {
+      console.error("Error fetching manage children data:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    // Compute geofence status
+    const processed = results.map(row => {
+      let status = "none";
+
+      if (row.fence_lat && row.latitude) {
+        const R = 6371e3;
+        const dLat = (row.latitude - row.fence_lat) * Math.PI / 180;
+        const dLon = (row.longitude - row.fence_lng) * Math.PI / 180;
+
+        const a =
+          Math.sin(dLat / 2) ** 2 +
+          Math.cos(row.fence_lat * Math.PI / 180) *
+          Math.cos(row.latitude * Math.PI / 180) *
+          Math.sin(dLon / 2) ** 2;
+
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        const distance = R * c;
+
+        status = distance <= row.radius ? "inside" : "outside";
+      }
+
+      return { ...row, geofence_status: status };
+    });
+
+    res.json(processed);
+  });
+});
+
+
 export default router;

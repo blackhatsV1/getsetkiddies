@@ -238,6 +238,15 @@ document.addEventListener("DOMContentLoaded", () => {
         coordsEl.textContent = "";
         lastSeenEl.textContent = "";
         scanBtn.style.display = "inline-block";
+
+        // ensure the map is brought into view and re-rendered even when there are no records
+        const mapContainerEl = document.getElementById("mapContainer");
+        if (mapContainerEl) {
+          mapContainerEl.scrollIntoView({ behavior: "smooth", block: "start" });
+          setTimeout(() => {
+            try { map.invalidateSize(); } catch (err) { /* ignore */ }
+          }, 450);
+        }
         return;
       }
 
@@ -390,8 +399,20 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
 <<<<<<< HEAD
+      // scroll map into view and ensure Leaflet redraws after layout change
+      const mapContainerEl = document.getElementById("mapContainer");
+      if (mapContainerEl) {
+        mapContainerEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        // allow scroll/paint then tell Leaflet to recalculate size so map displays correctly
+        setTimeout(() => {
+          try { map.invalidateSize(); } catch (err) { /* ignore */ }
+        }, 450);
+      }
+=======
+<<<<<<< HEAD
       // show details in side pane
 =======
+>>>>>>> 068aef9123f987ddc340c1827bc0ffefe3df7925
       
 >>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
       const lastLocation = historyData[historyData.length - 1];
@@ -498,4 +519,19 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  
+  // If ?child_id=... is present, auto-click the corresponding Show on Map button
+  (function autoOpenFromQuery() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const pre = params.get("child_id");
+      if (!pre) return;
+      // small delay to ensure all handlers are attached
+      setTimeout(() => {
+        const btn = document.querySelector(`.trackBtn[data-child-id="${pre}"]`);
+        if (btn) btn.click();
+      }, 250);
+    } catch (e) { /* ignore */ }
+  })();
+  
 });
