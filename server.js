@@ -105,7 +105,6 @@ app.use((req, res) => {
   res.status(404).render("pages/404", { title: "Page Not Found" }); 
 }); 
 
-<<<<<<< HEAD
 app.get("/geofence-setup", (req, res) => res.redirect("/api/geofences/setup"));
 
 app.get("/geofence-view", (req, res) => {
@@ -162,9 +161,4 @@ app.use((req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () =>
   console.log(`Server running at http://localhost:${PORT}`)
-=======
-const PORT = process.env.PORT || 3000; 
-app.listen(PORT, () => 
-  console.log(`Server running at http://localhost:${PORT}`) 
->>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
 );
