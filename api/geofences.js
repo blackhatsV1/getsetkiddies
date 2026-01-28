@@ -1,4 +1,3 @@
-// api/geofences.js
 import express from "express";
 import db from "../db/connection.js";
 
@@ -7,8 +6,7 @@ const router = express.Router();
 /* -----------------------------
    PAGE: Geofence Setup
 ----------------------------- */
-// api/geofences.js
-router.get("/setup", (req, res) => {
+router.get("/setup", async (req, res) => {
   if (!req.session.parent) return res.redirect("/login");
 
   const parent = req.session.parent;
@@ -33,82 +31,62 @@ router.get("/setup", (req, res) => {
     WHERE c.parent_id = ?
   `;
 
-  db.query(sql, [parent.id], (err, children) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send("Database error");
-    }
-
+  try {
+    const [children] = await db.query(sql, [parent.id]);
     res.render("pages/geofence-setup", {
       title: "Get Set Kiddies",
       parent,
       children,
       selectedChildId,
     });
-  });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Database error");
+  }
 });
-
 
 /* -----------------------------
    API: Add or Replace Geofence
 ----------------------------- */
-router.post("/add", (req, res) => {
+router.post("/add", async (req, res) => {
   const { child_id, name, latitude, longitude, radius } = req.body;
 
-  // First check if the child already has a geofence
-  const checkSql = "SELECT id FROM geofences WHERE child_id = ?";
-  db.query(checkSql, [child_id], (err, results) => {
-    if (err) {
-      console.error("Error checking existing geofence:", err);
-      return res.status(500).json({ error: "Database error" });
-    }
-
+  try {
+    const [results] = await db.query("SELECT id FROM geofences WHERE child_id = ?", [child_id]);
     if (results.length > 0) {
-      // Update existing geofence
-      const updateSql = `
-        UPDATE geofences
-        SET name = ?, latitude = ?, longitude = ?, radius = ?, updated_at = NOW()
-        WHERE child_id = ?
-      `;
-      db.query(updateSql, [name, latitude, longitude, radius, child_id], (err2) => {
-        if (err2) {
-          console.error("Error updating geofence:", err2);
-          return res.status(500).json({ error: "Failed to update geofence" });
-        }
-        res.json({ message: "Existing geofence replaced successfully" });
-      });
-
+      await db.query(
+        `UPDATE geofences
+         SET name = ?, latitude = ?, longitude = ?, radius = ?, updated_at = NOW()
+         WHERE child_id = ?`,
+        [name, latitude, longitude, radius, child_id]
+      );
+      res.json({ message: "Existing geofence replaced successfully" });
     } else {
-      // Insert new geofence
-      const insertSql = `
-        INSERT INTO geofences (child_id, name, latitude, longitude, radius, created_at)
-        VALUES (?, ?, ?, ?, ?, NOW())
-      `;
-      db.query(insertSql, [child_id, name, latitude, longitude, radius], (err3) => {
-        if (err3) {
-          console.error("Error adding geofence:", err3);
-          return res.status(500).json({ error: "Database error" });
-        }
-        res.json({ message: "Geofence added successfully" });
-      });
+      await db.query(
+        `INSERT INTO geofences (child_id, name, latitude, longitude, radius, created_at)
+         VALUES (?, ?, ?, ?, ?, NOW())`,
+        [child_id, name, latitude, longitude, radius]
+      );
+      res.json({ message: "Geofence added successfully" });
     }
-  });
+  } catch (err) {
+    console.error("Error saving geofence:", err);
+    res.status(500).json({ error: "Database error" });
+  }
 });
-
 
 /* -----------------------------
    API: Get geofences for child
 ----------------------------- */
-router.get("/:child_id", (req, res) => {
+router.get("/:child_id", async (req, res) => {
   const { child_id } = req.params;
-  const sql = "SELECT * FROM geofences WHERE child_id = ?";
-  db.query(sql, [child_id], (err, results) => {
-    if (err) {
-      console.error("Error fetching geofences:", err);
-      return res.status(500).send("Database error");
-    }
+  try {
+    const [results] = await db.query("SELECT * FROM geofences WHERE child_id = ?", [child_id]);
     res.json(results);
-  });
+  } catch (err) {
+    console.error("Error fetching geofences:", err);
+    res.status(500).send("Database error");
+  }
 });
 
 export default router;

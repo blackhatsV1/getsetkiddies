@@ -1,32 +1,25 @@
 <%- include('../partials/head') %>
 <body>
 
-
   <main class="content">
-    <!-- Logo -->
-    <div class="logo-container">
-      <div class="map-pin">
-        <div class="pin-center"></div>
-      </div>
-      <h1 class="logo-text">
-        <span class="white-text">GetSet</span> <span class="yellow-text">Kiddies</span>
-      </h1>
-    </div>
 
-    <!-- About Card -->
+    <!-- logo removed -->
+
     <div class="about-card">
       <h2>About Us</h2>
       <p>
-        We are a group of students from <strong>PHINMA University of Iloilo</strong>, 
-        currently pursuing our studies in <strong>BSIT</strong>. This project is part of our 
-        coursework to learn web development, location tracking, and interactive UI design.
+        We are a group of Information Technology students from 
+        <strong>PHINMA University of Iloilo</strong>. This project was created 
+        in partial fulfillment of the requirements for the degree 
+        <strong>Bachelor of Science in Information Technology (BSIT)</strong>.
       </p>
+
       <p>
         Our goal is to create a safe and fun platform for parents to monitor their children 
         and ensure their safety in daily activities.
       </p>
       <h3>Group Members</h3>
-      <ul>
+      <ul class="member-list">
         <li>Ellen Joy Cabaya</li>
         <li>Rowena Supleo</li>
         <li>Sakura Dela Cruz</li>
@@ -34,7 +27,6 @@
       <a href="/geofence-view" class="back-btn">&larr; Back to Home</a>
     </div>
 
-    <!-- Decorative Circles -->
     <div class="circle circle1"></div>
     <div class="circle circle2"></div>
     <div class="circle circle3"></div>
@@ -44,9 +36,9 @@
     body {
       font-family: "Roboto", sans-serif;
       margin: 0;
-      padding: 0;
+      padding: 0; /* removed horizontal padding that caused slight visual shift */
       background: linear-gradient(135deg, #c54478, #ff92ac);
-      min-height: 100vh;
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -57,52 +49,17 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       text-align: center;
-      width: 100%;
+      width: min(480px, 100%);
       max-width: 480px;
       padding: 40px 20px;
       box-sizing: border-box;
+      margin: 0 auto; /* ensure exact horizontal centering */
     }
 
-    /* Logo */
-    .logo-container {
-      text-align: center;
-      margin-bottom: 30px;
-      position: relative;
-      z-index: 2;
-    }
+    
 
-    .map-pin {
-      position: relative;
-      width: 120px;
-      height: 120px;
-      background-color: #692e69;
-      border-radius: 50% 50% 50% 0;
-      transform: rotate(-45deg);
-      margin: 0 auto 15px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    }
-
-    .pin-center {
-      position: absolute;
-      top: 25%;
-      left: 25%;
-      width: 60px;
-      height: 60px;
-      background-color: white;
-      border-radius: 50%;
-      transform: rotate(45deg);
-    }
-
-    .logo-text {
-      font-size: 32px;
-      font-weight: bold;
-    }
-
-    .white-text { color: #ffffff; }
-    .yellow-text { color: #ffff00; }
-
-    /* About Card */
     .about-card {
       position: relative;
       z-index: 2;
@@ -111,8 +68,8 @@
       padding: 35px 25px;
       border-radius: 20px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-      width: 100%;
-      text-align: left;
+      width: 100%; /* fill the centered content box */
+      text-align: left; /* keep card body left-aligned for readability */
     }
 
     .about-card h2 {
@@ -159,7 +116,6 @@
       background-color: #8b3c8b;
     }
 
-    /* Decorative Circles */
     .circle {
       position: absolute;
       border-radius: 50%;
@@ -194,6 +150,37 @@
       right: -60px;
       animation-delay: 4s;
     }
+    .member-list {
+      list-style: none !important;;
+      padding: 0;
+      margin: 12px 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .member-list li {
+      background: #f6eaf7;
+      color: #692e69;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      text-align: center;
+    }
+
+    @media (min-width: 480px) {
+      .member-list {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .member-list li {
+        margin: 4px;
+      }
+    }
+
 
     @keyframes float {
       0%, 100% { transform: translateY(0); }

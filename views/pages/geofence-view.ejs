@@ -20,7 +20,7 @@
     margin-bottom: 20px;
   }
 
-  /* Table */
+ 
   #geoTable {
     width: 100%;
     border-collapse: collapse;
@@ -58,7 +58,7 @@
     font-weight: bold;
   }
 
-  /* Map */
+ 
   #map {
     width: 100%;
     height: 600px;
@@ -66,7 +66,7 @@
     box-shadow: 0 6px 15px rgba(0,0,0,0.2);
   }
 
-  /* Responsive */
+  
   @media (max-width: 900px) {
     .content {
       padding: 20px;
@@ -89,6 +89,21 @@
   background-color: #8b3c8b;
 }
 
+<<<<<<< HEAD
+=======
+  
+  .deleteChildBtn {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+  }
+  .deleteChildBtn:hover { background-color: #c9302c; }
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
 </style>
 
   <%- include('../partials/top-nav-parents') %>
@@ -97,9 +112,13 @@
     <%- include('../partials/side-nav-parents') %>
 
     <main class="content">
-      <h2>Children with Geofence</h2>
+      <h1 class="themed-heading">Children with Geofences</h1>
       <p>Logged in as: <%= parent.firstname %> <%= parent.lastname %></p>
     <h3>Check the Status column to see if child is within the Geofence.</h3>
+
+    <!-- notification (appears above the table) -->
+    <div id="geoNotification" class="geo-notif" role="status" aria-live="polite" hidden></div>
+
       <% if (geofences.length === 0) { %>
         <p>No geofences have been added yet.</p>
       <% } else { %>
@@ -114,7 +133,11 @@
                 <th>Status</th>
                 <th>Last Known Location</th>
                 <th>Last Updated</th>
+<<<<<<< HEAD
                 <th>Action</th> <!-- 👈 New column -->
+=======
+                <th>Action</th> 
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
               </tr>
             </thead>
             <tbody id="geoBody">
@@ -140,6 +163,7 @@
                     <td><%= g.date_time ? new Date(g.date_time).toLocaleString('en-PH') : '—' %></td>
                     <td>
                       <button 
+<<<<<<< HEAD
                         class="editGeoBtn"
                         data-child-id="<%= g.child_id %>"
                         data-child-name="<%= g.firstname %> <%= g.lastname %>"
@@ -148,28 +172,51 @@
                         data-lng="<%= g.fence_lng %>"
                         data-radius="<%= g.radius %>">
                         Edit
+=======
+                        class="deleteChildBtn"
+                        data-child-id="<%= g.child_id %>"
+                        data-child-name="<%= g.firstname %> <%= g.lastname %>">
+                        Delete
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
                       </button>
                     </td>
                 </tr>
                 <% }) %>
             </tbody>
             </table>
-
+           <!-- end table -->
       <% } %>
       <div id="map" style="height: 600px; width: 100%; border-radius: 8px;"></div>
     </main>
   </div>
-
+  
+  <style>
+  
+  .geo-notif {
+    width: 100%;
+    background: rgba(255,255,255,0.95);
+    color: #692e69;
+    border-left: 4px solid #ffb86b;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin: 12px 0;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.06);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  </style>
+  
   <%- include('../partials/footer') %>
-
-  <!-- Leaflet JS -->
+  
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
 const geofences = <%- JSON.stringify(geofences) %>;
 
-// Leaflet map setup
+
 const map = L.map('map').setView([10.3157, 123.8854], 12);
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -177,7 +224,6 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© OpenStreetMap'
 }).addTo(map);
 
-// Function to calculate distance (in meters)
 function distance(lat1, lon1, lat2, lon2) {
   const R = 6371000; // meters
   const toRad = deg => deg * Math.PI / 180;
@@ -190,7 +236,6 @@ function distance(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-// Convert coordinates to human-readable address
 async function getReadableAddress(lat, lng) {
   try {
     const res = await fetch(
@@ -204,15 +249,14 @@ async function getReadableAddress(lat, lng) {
   }
 }
 
-// Main loop to plot geofences and children
 async function renderGeofences() {
   const allCoords = [];
+  const outsideList = [];
 
   for (const g of geofences) {
     const fenceCenter = [g.fence_lat, g.fence_lng];
     const childLoc = g.child_lat && g.child_lng ? [g.child_lat, g.child_lng] : null;
 
-    // Draw geofence circle
     const fenceCircle = L.circle(fenceCenter, {
       radius: g.radius,
       color: 'blue',
@@ -223,13 +267,20 @@ async function renderGeofences() {
 
     allCoords.push(fenceCenter);
 
-    // Process child marker
     if (childLoc) {
       allCoords.push(childLoc);
 
       const dist = distance(g.child_lat, g.child_lng, g.fence_lat, g.fence_lng);
       const inside = dist <= g.radius;
       const markerColor = inside ? 'green' : 'red';
+
+      
+      if (!inside) {
+        outsideList.push({
+          name: `${g.firstname} ${g.lastname}`,
+          dist: dist
+        });
+      }
 
       const childMarker = L.circleMarker(childLoc, {
         radius: 6,
@@ -238,10 +289,8 @@ async function renderGeofences() {
         fillOpacity: 0.9
       }).addTo(map);
 
-      // Fetch human-readable address
       const address = await getReadableAddress(g.child_lat, g.child_lng);
 
-      // Update table row
       const row = document.querySelector(
         `tr[data-child-lat="${g.child_lat}"][data-child-lng="${g.child_lng}"]`
       );
@@ -273,11 +322,57 @@ async function renderGeofences() {
     const bounds = L.latLngBounds(allCoords);
     if (bounds.isValid()) map.fitBounds(bounds);
   }
+
+  // build and display notification + text-to-speech
+  (function showGeoSummary() {
+    const notifEl = document.getElementById("geoNotification");
+    if (!notifEl) return;
+
+    if (outsideList.length === 0) {
+      notifEl.hidden = true;
+      notifEl.textContent = "";
+      return;
+    }
+
+    
+    const names = outsideList.map(o => o.name);
+    let formattedNames;
+    if (names.length === 1) {
+      formattedNames = names[0];
+    } else if (names.length === 2) {
+      formattedNames = `${names[0]} and ${names[1]}`;
+    } else {
+      formattedNames = `${names.slice(0, -1).join(', ')}, and ${names.slice(-1)}`;
+    }
+
+    let message;
+    if (outsideList.length === 1) {
+      const o = outsideList[0];
+      message = `${formattedNames} is outside the geofence (${o.dist.toFixed(0)} meters).`;
+    } else {
+      message = `${formattedNames} are outside the geofence. Please check the Status column for details.`;
+    }
+
+    notifEl.textContent = message;
+    notifEl.hidden = false;
+
+    
+    try {
+      const utter = new SpeechSynthesisUtterance(message);
+      // optional settings:
+      utter.rate = 1;
+      utter.pitch = 1;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(utter);
+    } catch (e) {
+      console.warn("TTS not available:", e);
+    }
+  })();
 }
 
-// Run rendering
 renderGeofences();
 
+<<<<<<< HEAD
 // Handle Edit Geofence button
 document.querySelectorAll(".editGeoBtn").forEach((btn) => {
   btn.addEventListener("click", () => {
@@ -285,6 +380,33 @@ document.querySelectorAll(".editGeoBtn").forEach((btn) => {
 
     // Redirect to the setup page for that specific child
     window.location.href = `/api/geofences/setup?child_id=${childId}`;
+=======
+document.querySelectorAll(".deleteChildBtn").forEach((btn) => {
+  btn.addEventListener("click", async () => {
+    const childId = btn.dataset.childId;
+    const childName = btn.dataset.childName || "this child";
+    const ok = confirm(`Delete ${childName} and ALL their records (locations, geofences)? This cannot be undone.`);
+    if (!ok) return;
+
+    try {
+      const res = await fetch("/api/children/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ child_id: childId })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ message: 'Delete failed' }));
+        alert(err.message || "Failed to delete child");
+        return;
+      }
+      // success: reload to refresh table/map
+      alert(`${childName} deleted`);
+      window.location.reload();
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Network error deleting child");
+    }
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
   });
 });
 

@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeChildId = null;
   let activeChildName = "";
 
-  //Tile layer
+  
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
     attribution: "© OpenStreetMap",
@@ -15,9 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const saveBtn = document.getElementById("saveGeofence");
   const infoEl = document.getElementById("geoInfo");
 
-  /* ------------------------------------
-     Convert coordinates to address
-  ------------------------------------ */
+ 
   async function getReadableAddress(lat, lng) {
     try {
       const res = await fetch(
@@ -31,9 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  /* ------------------------------------
-     Load readable addresses
-  ------------------------------------ */
+  
   async function loadAddresses() {
   const rows = [...document.querySelectorAll("#childrenTable tr[data-child-id]")];
 
@@ -51,9 +47,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadAddresses();
 
-  /* ------------------------------------
-     Set Geofence Button Logic
-  ------------------------------------ */
   document.querySelectorAll(".setGeoBtn").forEach((btn) => {
     btn.addEventListener("click", () => {
       activeChildId = btn.dataset.childId;
@@ -62,18 +55,18 @@ document.addEventListener("DOMContentLoaded", () => {
       const lat = parseFloat(btn.dataset.lat);
       const lng = parseFloat(btn.dataset.lng);
 
-      // Clear old markers
+      
       if (marker) map.removeLayer(marker);
       if (circle) map.removeLayer(circle);
 
-      // Center the map to last known location if available
+      
       if (!isNaN(lat) && !isNaN(lng)) {
         map.setView([lat, lng], 15);
         marker = L.marker([lat, lng]).addTo(map);
         infoEl.innerHTML = `
-          <b>Setting geofence for ${activeChildName}</b><br>
+          <h1><b>Setting Geofence for: ${activeChildName}</b></h1><br>
           Last known location: ${lat.toFixed(5)}, ${lng.toFixed(5)}.
-          <br><h2>Click the map to adjust center.</h2>
+          <br><h4>Click the map to adjust center.</h4>
         `;
       } else {
         map.setView([10.3157, 123.8854], 13);
@@ -84,9 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  /* ------------------------------------
-     Map click handler
-  ------------------------------------ */
+  
   map.on("click", (e) => {
     if (!activeChildId) {
       alert("Please select a child first.");
@@ -115,9 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   });
 
-  /* ------------------------------------
-     Save geofence
-  ------------------------------------ */
+ 
   saveBtn.addEventListener("click", async () => {
     if (!activeChildId || !marker) {
       alert("Please set a geofence first.");
@@ -155,7 +144,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+<<<<<<< HEAD
 // Auto-select a child if provided from query
+=======
+
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
 const urlParams = new URLSearchParams(window.location.search);
 const selectedChildId = urlParams.get("child_id");
 

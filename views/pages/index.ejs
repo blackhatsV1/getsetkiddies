@@ -2,7 +2,7 @@
 <body>
 
   <main class="content">
-    <!-- Logo -->
+    
     <div class="logo-container">
       <div class="map-pin">
         <div class="pin-center"></div>
@@ -12,7 +12,7 @@
       </h1>
     </div>
 
-    <!-- Login Prompt Card -->
+    
     <div class="login-prompt">
       <h2 id="welcomeText">Welcome!</h2>
       <p id="infoText">Track your child for their safety!</p>
@@ -20,19 +20,19 @@
       <p class="register-text">No account? <a href="/register">Register here</a></p>
     </div>
 
-    <!-- Decorative Circles for Playful Theme -->
+    
     <div class="circle circle1"></div>
     <div class="circle circle2"></div>
     <div class="circle circle3"></div>
   </main>
 
   <style>
-    body {
+     body {
       font-family: "Roboto", sans-serif;
       margin: 0;
-      padding: 0;
+      padding: 0 12px; 
       background: linear-gradient(135deg, #c54478, #ff92ac);
-      min-height: 100vh;
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -43,14 +43,17 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       text-align: center;
-      width: 100%;
+      width: min(480px, 100%); 
       max-width: 480px;
       padding: 40px 20px;
       box-sizing: border-box;
+      margin: 0 auto; 
+      height: auto; 
     }
 
-    /* Logo */
+    
     .logo-container {
       text-align: center;
       margin-bottom: 30px;
@@ -88,14 +91,14 @@
 
     .white-text {
   color: #ffffff;
-  text-shadow: 2px 2px 5px rgba(0,0,0,0.4); /* makes 'GetSet' pop */
+  text-shadow: 2px 2px 5px rgba(0,0,0,0.4); 
 }
     .yellow-text {
   color: #ffff00;
   text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
 }
 
-    /* Login Card */
+    
     .login-prompt {
       position: relative;
       z-index: 2;
@@ -150,7 +153,7 @@
       text-decoration: underline;
     }
 
-    /* Decorative Circles */
+    
     .circle {
       position: absolute;
       border-radius: 50%;
@@ -186,7 +189,7 @@
       animation-delay: 4s;
     }
 
-    /* Animations */
+    
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
@@ -197,7 +200,7 @@
       50% { transform: translateY(-15px); }
     }
 
-    /* Responsive */
+    
     @media (max-width: 500px) {
       .logo-text { font-size: 28px; }
       .map-pin { width: 100px; height: 100px; }
@@ -207,20 +210,22 @@
   </style>
 
   <script>
-    
-    const messages = [
-      "Welcome!",
-      "Track your child safely!",
-      "Stay updated anytime!",
-      "Ensure their safety now!"
-    ];
-    let i = 0;
-    const welcomeText = document.getElementById("welcomeText");
-
-    setInterval(() => {
-      welcomeText.textContent = messages[i];
-      i = (i + 1) % messages.length;
-    }, 3000);
+   document.addEventListener('DOMContentLoaded', () => {
+      const messages = [
+        "Welcome!",
+        "Track your child safely!",
+        "Stay updated anytime!",
+        "Ensure their safety now!"
+      ];
+      let i = 0;
+      const welcomeText = document.getElementById("welcomeText");
+      if (!welcomeText) return;
+      welcomeText.textContent = messages[0];
+      setInterval(() => {
+        welcomeText.textContent = messages[i];
+        i = (i + 1) % messages.length;
+      }, 3000);
+    });
   </script>
 
 </body>

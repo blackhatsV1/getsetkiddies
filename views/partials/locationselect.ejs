@@ -1,4 +1,4 @@
-<!-- Leaflet CSS & JS -->
+
 <link
   rel="stylesheet"
   href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -22,7 +22,7 @@
 
   #scanBtn {
   position: absolute;
-  top: 15px;        /* move button to top */
+  top: 15px;       
   left: 50%;
   transform: translateX(-50%);
   background-color: #007bff;
@@ -31,7 +31,7 @@
   padding: 10px 18px;
   border-radius: 8px;
   cursor: pointer;
-  display: none; /* show via JS when needed */
+  display: none;
   font-weight: bold;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
   z-index: 1000;
@@ -44,7 +44,6 @@
     line-height: 1.4;
   }
 
-    /* Spinner animation */
     .loading-spinner {
     border: 3px solid #f3f3f3;
     border-top: 3px solid #3498db;
@@ -67,7 +66,7 @@
 <div id="coords"></div>
 <div id="address"></div>
 <div id="lastSeen"></div>
-<!-- Entire map section -->
+
 <div id="mapContainer">
   <button id="scanBtn">Scan for Current Location</button>
   <div id="map"></div>
