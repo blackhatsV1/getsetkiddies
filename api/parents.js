@@ -8,7 +8,7 @@ router.use(bodyParser.urlencoded({ extended: true }));
 /* -----------------------------
    API: Register new parent
 ----------------------------- */
-router.post("/register", (req, res) => {
+router.post("/register", async (req, res) => {
   const { firstname, lastname, email, number, home_address, password } = req.body;
 
   if (!firstname || !lastname || !email || !password) {
@@ -19,33 +19,32 @@ router.post("/register", (req, res) => {
     INSERT INTO parents (firstname, lastname, email, phone_number, home_address, password, date_created)
     VALUES (?, ?, ?, ?, ?, ?, NOW())
   `;
-  db.query(sql, [firstname, lastname, email, number, home_address, password], (err) => {
-    if (err) {
-      console.error("Error registering parent:", err);
-      return res.status(500).send("Database error");
-    }
+  try {
+    await db.query(sql, [firstname, lastname, email, number, home_address, password]);
     res.redirect("/login");
-  });
+  } catch (err) {
+    console.error("Error registering parent:", err);
+    res.status(500).send("Database error");
+  }
 });
 
 /* -----------------------------
    API: Parent login
 ----------------------------- */
-router.post("/login", (req, res) => {
+router.post("/login", async (req, res) => {
   const { email, password } = req.body;
-
   const sql = "SELECT * FROM parents WHERE email = ? AND password = ?";
-  db.query(sql, [email, password], (err, result) => {
-    if (err) {
-      console.error("Error logging in:", err);
-      return res.status(500).send("Database error");
-    }
 
+  try {
+    const [result] = await db.query(sql, [email, password]);
     if (result.length === 0) return res.status(401).send("Invalid credentials");
 
     req.session.parent = result[0];
     res.redirect("/geofence-view");
-  });
+  } catch (err) {
+    console.error("Error logging in:", err);
+    res.status(500).send("Database error");
+  }
 });
 
 /* -----------------------------
@@ -62,27 +61,26 @@ router.get("/logout", (req, res) => {
 /* -----------------------------
    PAGE: Track Child
 ----------------------------- */
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
   const parent = req.session.parent;
   if (!parent) return res.redirect("/login");
 
   const sql = `SELECT id, firstname, lastname, child_age, child_gender, date_registered
                FROM registered_children
                WHERE parent_id = ?
-               ORDER BY date_registered DESC`; // latest first
+               ORDER BY date_registered DESC`;
 
-  db.query(sql, [parent.id], (err, results) => {
-    if (err) {
-      console.error("Error fetching children:", err);
-      return res.status(500).send("Database error");
-    }
-
+  try {
+    const [results] = await db.query(sql, [parent.id]);
     res.render("pages/track-child", {
       title: "Track Your Child",
       parent,
       children: results,
     });
-  });
+  } catch (err) {
+    console.error("Error fetching children:", err);
+    res.status(500).send("Database error");
+  }
 });
 
 /* -----------------------------------------
