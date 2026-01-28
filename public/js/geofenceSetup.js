@@ -170,7 +170,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+<<<<<<< HEAD
+// Auto-select a child if provided from query
+=======
 
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
 const urlParams = new URLSearchParams(window.location.search);
 const selectedChildId = urlParams.get("child_id");
 

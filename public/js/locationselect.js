@@ -1,6 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
   function calculateDistance(lat1, lon1, lat2, lon2) {
+<<<<<<< HEAD
+    const R = 6371000; // meters
+=======
     const R = 6371000; 
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
     const toRad = (deg) => (deg * Math.PI) / 180;
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
@@ -28,7 +32,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const scanBtn = document.getElementById("scanBtn");
   const table = document.getElementById("childrenTable");
 
+<<<<<<< HEAD
+  // Create map
+=======
   
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
   let map = L.map(mapDiv).setView([0, 0], 2);
 
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -36,6 +44,16 @@ document.addEventListener("DOMContentLoaded", () => {
     attribution: '© OpenStreetMap'
   }).addTo(map);
 
+<<<<<<< HEAD
+  // Layer references so we can clear them when switching children
+  window.pathLine = null;            // polyline for history
+  window.historyMarkers = [];       // markers array for history points
+  window.currentFence = null;       // circle for geofence
+  window.currentTraceLine = null;   // polyline from child to fence center
+  window.currentMarker = null;      // latest marker from scan (if any)
+
+  // Populate Last Known Location cells (uncommented, works per child)
+=======
   
   window.pathLine = null;            
   window.historyMarkers = [];       
@@ -44,6 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.currentMarker = null;     
 
  
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
   document.querySelectorAll("tr[data-child-id]").forEach(async (row) => {
     const childId = row.getAttribute("data-child-id");
     const locationCell = row.querySelector(".last-location");
@@ -65,7 +84,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Automatically check geofence status for each child (fills geoStatus column)
+  document.querySelectorAll("tr[data-child-id]").forEach(async (row) => {
+    const childId = row.getAttribute("data-child-id");
+    const statusCell = row.querySelector(".geoStatus");
 
+<<<<<<< HEAD
+    try {
+      const [geoRes, locRes] = await Promise.all([
+        fetch(`/api/geofences/${childId}`),
+        fetch(`/api/locations/${childId}`)
+      ]);
+
+      const geofenceData = await geoRes.json();
+      const locationData = await locRes.json();
+
+=======
   document.querySelectorAll("tr[data-child-id]").forEach(async (row) => {
     const childId = row.getAttribute("data-child-id");
     const statusCell = row.querySelector(".geoStatus");
@@ -79,6 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const geofenceData = await geoRes.json();
       const locationData = await locRes.json();
 
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
       if (!Array.isArray(geofenceData) || geofenceData.length === 0) {
         statusCell.innerHTML = `<span style="color:gray;">No geofence set</span>`;
         return;
@@ -89,7 +124,11 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+<<<<<<< HEAD
+      // Calculate distance
+=======
       
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
       const g = geofenceData[0];
       const dist = calculateDistance(
         locationData.latitude,
@@ -108,8 +147,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+<<<<<<< HEAD
+  // Helper to clear previously drawn layers
+  function clearPreviousLayers() {
+    // remove history markers
+=======
   
   function clearPreviousLayers() {
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
     if (window.historyMarkers && window.historyMarkers.length) {
       window.historyMarkers.forEach(m => {
         try { map.removeLayer(m); } catch (e) {}
@@ -117,35 +162,58 @@ document.addEventListener("DOMContentLoaded", () => {
       window.historyMarkers = [];
     }
 
+<<<<<<< HEAD
+    // remove path line
+=======
 
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
     if (window.pathLine) {
       try { map.removeLayer(window.pathLine); } catch (e) {}
       window.pathLine = null;
     }
 
+<<<<<<< HEAD
+    // remove geofence circle
+=======
     
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
     if (window.currentFence) {
       try { map.removeLayer(window.currentFence); } catch (e) {}
       window.currentFence = null;
     }
 
+<<<<<<< HEAD
+    // remove trace line
+=======
    
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
     if (window.currentTraceLine) {
       try { map.removeLayer(window.currentTraceLine); } catch (e) {}
       window.currentTraceLine = null;
     }
 
+<<<<<<< HEAD
+    // remove current scan marker
+=======
    
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
     if (window.currentMarker) {
       try { map.removeLayer(window.currentMarker); } catch (e) {}
       window.currentMarker = null;
     }
   }
 
+<<<<<<< HEAD
+  // When clicking "Show on Map"
+  trackButtons.forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      // Clear previously drawn layers for a clean map
+=======
   
   trackButtons.forEach((btn) => {
     btn.addEventListener("click", async () => {
      
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
       clearPreviousLayers();
 
       scanBtn.style.display = "none";
@@ -156,7 +224,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const historyRes = await fetch(`/api/locations/history/${activeChildId}`);
       const historyData = await historyRes.json();
 
+<<<<<<< HEAD
+      // Fetch geofence data for this child
+=======
       
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
       const geofenceRes = await fetch(`/api/geofences/${activeChildId}`);
       const geofenceData = await geofenceRes.json();
 
@@ -178,7 +250,11 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+<<<<<<< HEAD
+      // draw history markers and collect coords
+=======
       
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
       const coordsArray = [];
       const totalPoints = historyData.length;
 
@@ -209,24 +285,39 @@ document.addEventListener("DOMContentLoaded", () => {
         window.historyMarkers.push(pastMarker);
       });
 
+<<<<<<< HEAD
+      // draw path line
+=======
       
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
       window.pathLine = L.polyline(coordsArray, {
         color: "blue",
         weight: 3,
         opacity: 0.7
       }).addTo(map);
 
+<<<<<<< HEAD
+      // default bounds to path
+      let boundsGroup = L.featureGroup([window.pathLine]);
+
+      // If geofence exists, draw it and the trace line (if needed)
+=======
      
       let boundsGroup = L.featureGroup([window.pathLine]);
 
       
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
       if (Array.isArray(geofenceData) && geofenceData.length > 0) {
         const g = geofenceData[0];
         const fenceLat = g.latitude;
         const fenceLng = g.longitude;
         const radius = g.radius;
 
+<<<<<<< HEAD
+        // Draw geofence circle and keep reference
+=======
         
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
         window.currentFence = L.circle([fenceLat, fenceLng], {
           radius,
           color: "blue",
@@ -236,7 +327,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         boundsGroup.addLayer(window.currentFence);
 
+<<<<<<< HEAD
+        // If last known location exists, check distance & draw trace line
+=======
         
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
         if (historyData.length > 0) {
           const lastLoc = historyData[historyData.length - 1];
 
@@ -249,7 +344,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
           const inside = dist <= radius;
 
+<<<<<<< HEAD
+          // Update status column (again) to reflect up-to-date state
+=======
          
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
           const statusCell = document.querySelector(`.geoStatus[data-child-id="${activeChildId}"]`);
           if (statusCell) {
             statusCell.innerHTML = inside
@@ -257,7 +356,11 @@ document.addEventListener("DOMContentLoaded", () => {
               : `<span style="color:red;">Outside (${dist.toFixed(1)} m)</span>`;
           }
 
+<<<<<<< HEAD
+          // Always draw trace line; color depends on inside/outside
+=======
           
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
           window.currentTraceLine = L.polyline(
             [
               [lastLoc.latitude, lastLoc.longitude],
@@ -274,12 +377,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
+<<<<<<< HEAD
+      // Fit map to bounds consisting of path (+ fence/trace if present)
+=======
       
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
       try {
         const bounds = boundsGroup.getBounds();
         if (bounds.isValid()) {
           map.fitBounds(bounds, { padding: [30, 30] });
         } else {
+<<<<<<< HEAD
+          // fallback: center on last point
+=======
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
           const lastLocation = historyData[historyData.length - 1];
           map.setView([lastLocation.latitude, lastLocation.longitude], 15);
         }
@@ -287,6 +398,7 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Error fitting bounds:", e);
       }
 
+<<<<<<< HEAD
       // scroll map into view and ensure Leaflet redraws after layout change
       const mapContainerEl = document.getElementById("mapContainer");
       if (mapContainerEl) {
@@ -296,7 +408,13 @@ document.addEventListener("DOMContentLoaded", () => {
           try { map.invalidateSize(); } catch (err) { /* ignore */ }
         }, 450);
       }
+=======
+<<<<<<< HEAD
+      // show details in side pane
+=======
+>>>>>>> 068aef9123f987ddc340c1827bc0ffefe3df7925
       
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
       const lastLocation = historyData[historyData.length - 1];
       const { latitude, longitude, readable_address, date_time } = lastLocation;
 
@@ -308,7 +426,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+<<<<<<< HEAD
+  // Scan button logic (keeps current marker in window.currentMarker so it can be removed)
+=======
   
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
   scanBtn.addEventListener("click", async () => {
     if (!activeChildId) return alert("Please select a child first.");
     if (!navigator.geolocation) return alert("Geolocation not supported.");
@@ -317,7 +439,11 @@ document.addEventListener("DOMContentLoaded", () => {
     scanBtn.innerHTML = `<span class="loading-spinner"></span> Scanning location...`;
     scanBtn.disabled = true;
 
+<<<<<<< HEAD
+    // remove previous current marker (if any)
+=======
    
+>>>>>>> 8969251ce8380bc345c9e1effcfd6b338394f9dc
     if (window.currentMarker) {
       try { map.removeLayer(window.currentMarker); } catch (e) {}
       window.currentMarker = null;
