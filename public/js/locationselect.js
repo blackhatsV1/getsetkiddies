@@ -1,12 +1,25 @@
 document.addEventListener("DOMContentLoaded", () => {
-    function formatFullDateTime(dateString) {
-        const optionsDate = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
-        const optionsTime = { hour: "numeric", minute: "2-digit", hour12: true };
-        const date = new Date(dateString);
-        const formattedDate = date.toLocaleDateString("en-US", optionsDate);
-        const formattedTime = date.toLocaleTimeString("en-US", optionsTime);
-        return `${formattedDate} – ${formattedTime}`;
-    }
+  function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371000; // meters
+    const toRad = (deg) => (deg * Math.PI) / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function formatFullDateTime(dateString) {
+    const optionsDate = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
+    const optionsTime = { hour: "numeric", minute: "2-digit", hour12: true };
+    const date = new Date(dateString);
+    const formattedDate = date.toLocaleDateString("en-US", optionsDate);
+    const formattedTime = date.toLocaleTimeString("en-US", optionsTime);
+    return `${formattedDate} – ${formattedTime}`;
+  }
+
   const trackButtons = document.querySelectorAll(".trackBtn");
   const mapDiv = document.getElementById("map");
   const addressEl = document.getElementById("address");
@@ -15,16 +28,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const scanBtn = document.getElementById("scanBtn");
   const table = document.getElementById("childrenTable");
 
+  // Create map
   let map = L.map(mapDiv).setView([0, 0], 2);
-  let marker;
-  let activeChildId = null;
-  let activeChildName = "";
 
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '© OpenStreetMap'
   }).addTo(map);
 
+  // Layer references so we can clear them when switching children
+  window.pathLine = null;            // polyline for history
+  window.historyMarkers = [];       // markers array for history points
+  window.currentFence = null;       // circle for geofence
+  window.currentTraceLine = null;   // polyline from child to fence center
+  window.currentMarker = null;      // latest marker from scan (if any)
+
+  // Populate Last Known Location cells (uncommented, works per child)
   document.querySelectorAll("tr[data-child-id]").forEach(async (row) => {
     const childId = row.getAttribute("data-child-id");
     const locationCell = row.querySelector(".last-location");
@@ -32,182 +51,330 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const res = await fetch(`/api/locations/${childId}`);
       const data = await res.json();
+
       if (data.message === "no records yet") {
         locationCell.textContent = "No records yet";
       } else {
-        locationCell.textContent = data.readable_address || "Unknown";
+        const readable = data.readable_address || "Unknown";
+        const formatted = data.date_time ? new Date(data.date_time).toLocaleString("en-US") : "";
+        locationCell.innerHTML = `${readable}<br><small>${formatted}</small>`;
       }
-    } catch {
+    } catch (err) {
+      console.error("Error fetching location for table:", err);
       locationCell.textContent = "Error loading";
     }
   });
 
+  // Automatically check geofence status for each child (fills geoStatus column)
+  document.querySelectorAll("tr[data-child-id]").forEach(async (row) => {
+    const childId = row.getAttribute("data-child-id");
+    const statusCell = row.querySelector(".geoStatus");
 
+    try {
+      const [geoRes, locRes] = await Promise.all([
+        fetch(`/api/geofences/${childId}`),
+        fetch(`/api/locations/${childId}`)
+      ]);
 
-trackButtons.forEach((btn) => {
-  btn.addEventListener("click", async () => {
-    scanBtn.style.display = "none";
-    activeChildId = btn.getAttribute("data-child-id");
-    activeChildName = btn.getAttribute("data-child-name");
+      const geofenceData = await geoRes.json();
+      const locationData = await locRes.json();
 
-    if (marker) {
-      map.removeLayer(marker);
-      marker = null;
+      if (!Array.isArray(geofenceData) || geofenceData.length === 0) {
+        statusCell.innerHTML = `<span style="color:gray;">No geofence set</span>`;
+        return;
+      }
+
+      if (locationData.message === "no records yet") {
+        statusCell.innerHTML = `<span style="color:gray;">No location data</span>`;
+        return;
+      }
+
+      // Calculate distance
+      const g = geofenceData[0];
+      const dist = calculateDistance(
+        locationData.latitude,
+        locationData.longitude,
+        g.latitude,
+        g.longitude
+      );
+
+      const inside = dist <= g.radius;
+      statusCell.innerHTML = inside
+        ? `<span style="color:green;">Inside geofence</span>`
+        : `<span style="color:red;">Outside (${dist.toFixed(1)} m)</span>`;
+    } catch (err) {
+      console.error("Error checking geofence:", err);
+      statusCell.textContent = "Error";
     }
+  });
+
+  // Helper to clear previously drawn layers
+  function clearPreviousLayers() {
+    // remove history markers
+    if (window.historyMarkers && window.historyMarkers.length) {
+      window.historyMarkers.forEach(m => {
+        try { map.removeLayer(m); } catch (e) {}
+      });
+      window.historyMarkers = [];
+    }
+
+    // remove path line
     if (window.pathLine) {
-      map.removeLayer(window.pathLine);
+      try { map.removeLayer(window.pathLine); } catch (e) {}
       window.pathLine = null;
     }
-    if (window.historyMarkers) {
-      window.historyMarkers.forEach(m => map.removeLayer(m));
-    }
-    window.historyMarkers = [];
 
-    const historyRes = await fetch(`/api/locations/history/${activeChildId}`);
-    const historyData = await historyRes.json();
-
-    if (historyData.message === "no records yet") {
-      map.setView([0, 0], 2);
-      addressEl.innerHTML = `<b>No records yet for ${activeChildName}.</b>`;
-      coordsEl.textContent = "";
-      lastSeenEl.textContent = "";
-      scanBtn.style.display = "inline-block";
-      return;
+    // remove geofence circle
+    if (window.currentFence) {
+      try { map.removeLayer(window.currentFence); } catch (e) {}
+      window.currentFence = null;
     }
 
-    const coordsArray = [];
-    const totalPoints = historyData.length;
+    // remove trace line
+    if (window.currentTraceLine) {
+      try { map.removeLayer(window.currentTraceLine); } catch (e) {}
+      window.currentTraceLine = null;
+    }
 
-    historyData.forEach((loc, index) => {
-      const { latitude, longitude, readable_address, date_time } = loc;
-      coordsArray.push([latitude, longitude]);
-
-      const formattedTime = date_time
-        ? formatFullDateTime(date_time)
-        : "Unknown time";
-
-      const isLast = index === totalPoints - 1;
-      const markerColor = isLast ? "red" : "gray";
-      const markerRadius = isLast ? 10 : 5;
-
-    const pastMarker = L.marker([latitude, longitude], {
-    icon: L.icon({
-        iconUrl: isLast
-        ? "https://maps.gstatic.com/mapfiles/ms2/micons/red-dot.png"  // last = red
-        : "https://maps.gstatic.com/mapfiles/ms2/micons/blue-dot.png", // older = blue
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -30]
-    })
-    }).addTo(map);
-
-
-      pastMarker.bindPopup(`
-        <b>${activeChildName}</b><br>
-        ${readable_address}<br>
-        ${formatFullDateTime(date_time)}
-      `);
-
-      window.historyMarkers.push(pastMarker);
-    });
-
-    window.pathLine = L.polyline(coordsArray, {
-      color: "blue",
-      weight: 3,
-      opacity: 0.7
-    }).addTo(map);
-
-    map.fitBounds(window.pathLine.getBounds(), { padding: [30, 30] });
-
-    const lastLocation = historyData[totalPoints - 1];
-    const { latitude, longitude, readable_address, date_time } = lastLocation;
-
-    addressEl.innerHTML = `<p>Last known location of <b>${activeChildName}</b> is at <b><i>${readable_address}.</i></b></p>`;
-    coordsEl.textContent = `Latitude: ${latitude}, Longitude: ${longitude}`;
-    lastSeenEl.innerHTML = `Last seen on <b>${formatFullDateTime(date_time)}</b>.<br><br>Please click the button for a recent update of the location.`;
-
-    scanBtn.style.display = "inline-block";
-  });
-});
-
-
-scanBtn.addEventListener("click", async () => {
-  if (!activeChildId) return alert("Please select a child first.");
-  if (!navigator.geolocation) return alert("Geolocation not supported.");
-
-  const originalText = scanBtn.innerHTML;
-  scanBtn.innerHTML = `<span class="loading-spinner"></span> Scanning location...`;
-  scanBtn.disabled = true;
-
-  if (marker) {
-    map.removeLayer(marker);
-    marker = null;
+    // remove current scan marker
+    if (window.currentMarker) {
+      try { map.removeLayer(window.currentMarker); } catch (e) {}
+      window.currentMarker = null;
+    }
   }
 
-  navigator.geolocation.getCurrentPosition(async (position) => {
-    const lat = position.coords.latitude;
-    const lng = position.coords.longitude;
+  // When clicking "Show on Map"
+  trackButtons.forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      // Clear previously drawn layers for a clean map
+      clearPreviousLayers();
 
-    let readable_address = "";
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
-      );
-      const data = await response.json();
-      readable_address = data.display_name || "Unknown location";
-    } catch {
-      readable_address = "Address not found";
-    }
+      scanBtn.style.display = "none";
+      const btnChildId = btn.getAttribute("data-child-id");
+      activeChildId = btnChildId;
+      activeChildName = btn.getAttribute("data-child-name");
 
-    const now = new Date();
-    const formattedNow = formatFullDateTime(now);
+      const historyRes = await fetch(`/api/locations/history/${activeChildId}`);
+      const historyData = await historyRes.json();
 
-    marker = L.marker([lat, lng], {
-      icon: L.icon({
-        iconUrl: "https://maps.gstatic.com/mapfiles/ms2/micons/red-dot.png",
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -30],
-      }),
-    })
-      .addTo(map)
-      .bindPopup(`
-        Child Name: <b>${activeChildName}</b><br>
-        ${readable_address}<br>
-        <i>${formattedNow}</i>
-      `)
-      .openPopup();
+      // Fetch geofence data for this child
+      const geofenceRes = await fetch(`/api/geofences/${activeChildId}`);
+      const geofenceData = await geofenceRes.json();
 
-    map.setView([lat, lng], 15);
+      if (historyData.message === "no records yet") {
+        map.setView([0, 0], 2);
+        addressEl.innerHTML = `<b>No records yet for ${activeChildName}.</b>`;
+        coordsEl.textContent = "";
+        lastSeenEl.textContent = "";
+        scanBtn.style.display = "inline-block";
+        return;
+      }
 
-    try {
-      const res = await fetch("/api/locations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          child_id: activeChildId,
-          latitude: lat,
-          longitude: lng,
-          readable_address,
-        }),
+      // draw history markers and collect coords
+      const coordsArray = [];
+      const totalPoints = historyData.length;
+
+      historyData.forEach((loc, index) => {
+        const { latitude, longitude, readable_address, date_time } = loc;
+        coordsArray.push([latitude, longitude]);
+
+        const isLast = index === totalPoints - 1;
+        const markerIconUrl = isLast
+          ? "https://maps.gstatic.com/mapfiles/ms2/micons/red-dot.png"
+          : "https://maps.gstatic.com/mapfiles/ms2/micons/blue-dot.png";
+
+        const pastMarker = L.marker([latitude, longitude], {
+          icon: L.icon({
+            iconUrl: markerIconUrl,
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+            popupAnchor: [0, -30]
+          })
+        }).addTo(map);
+
+        pastMarker.bindPopup(`
+          <b>${activeChildName}</b><br>
+          ${readable_address}<br>
+          ${formatFullDateTime(date_time)}
+        `);
+
+        window.historyMarkers.push(pastMarker);
       });
-      const result = await res.json();
 
-      addressEl.innerHTML = `<b>Current location of ${activeChildName}:</b> ${readable_address}`;
-      coordsEl.textContent = `Lat: ${lat}, Lng: ${lng}`;
-      lastSeenEl.innerHTML = `Last updated on <b>${formattedNow}</b>.`;
-      const row = table.querySelector(`tr[data-child-id="${activeChildId}"]`);
-      if (row) row.querySelector(".last-location").textContent = readable_address;
+      // draw path line
+      window.pathLine = L.polyline(coordsArray, {
+        color: "blue",
+        weight: 3,
+        opacity: 0.7
+      }).addTo(map);
 
-      alert("Child's location acquired successfully.");
-    } catch (err) {
-      console.error(err);
-      alert("Error saving location.");
+      // default bounds to path
+      let boundsGroup = L.featureGroup([window.pathLine]);
+
+      // If geofence exists, draw it and the trace line (if needed)
+      if (Array.isArray(geofenceData) && geofenceData.length > 0) {
+        const g = geofenceData[0];
+        const fenceLat = g.latitude;
+        const fenceLng = g.longitude;
+        const radius = g.radius;
+
+        // Draw geofence circle and keep reference
+        window.currentFence = L.circle([fenceLat, fenceLng], {
+          radius,
+          color: "blue",
+          fillColor: "#3f8efc",
+          fillOpacity: 0.3,
+        }).addTo(map).bindPopup(`<b>${g.name}</b><br>Radius: ${radius} m`);
+
+        boundsGroup.addLayer(window.currentFence);
+
+        // If last known location exists, check distance & draw trace line
+        if (historyData.length > 0) {
+          const lastLoc = historyData[historyData.length - 1];
+
+          const dist = calculateDistance(
+            lastLoc.latitude,
+            lastLoc.longitude,
+            fenceLat,
+            fenceLng
+          );
+
+          const inside = dist <= radius;
+
+          // Update status column (again) to reflect up-to-date state
+          const statusCell = document.querySelector(`.geoStatus[data-child-id="${activeChildId}"]`);
+          if (statusCell) {
+            statusCell.innerHTML = inside
+              ? `<span style="color:green;">Inside geofence</span>`
+              : `<span style="color:red;">Outside (${dist.toFixed(1)} m)</span>`;
+          }
+
+          // Always draw trace line; color depends on inside/outside
+          window.currentTraceLine = L.polyline(
+            [
+              [lastLoc.latitude, lastLoc.longitude],
+              [fenceLat, fenceLng]
+            ],
+            {
+              color: inside ? "green" : "red",
+              weight: 2,
+              dashArray: inside ? "3 6" : "5 5"
+            }
+          ).addTo(map).bindPopup(`${inside ? "Inside zone" : "Outside zone"}<br>Distance: ${dist.toFixed(1)} m`);
+
+          boundsGroup.addLayer(window.currentTraceLine);
+        }
+      }
+
+      // Fit map to bounds consisting of path (+ fence/trace if present)
+      try {
+        const bounds = boundsGroup.getBounds();
+        if (bounds.isValid()) {
+          map.fitBounds(bounds, { padding: [30, 30] });
+        } else {
+          // fallback: center on last point
+          const lastLocation = historyData[historyData.length - 1];
+          map.setView([lastLocation.latitude, lastLocation.longitude], 15);
+        }
+      } catch (e) {
+        console.error("Error fitting bounds:", e);
+      }
+
+      // show details in side pane
+      const lastLocation = historyData[historyData.length - 1];
+      const { latitude, longitude, readable_address, date_time } = lastLocation;
+
+      addressEl.innerHTML = `<p>Last known location of <b>${activeChildName}</b> is at <b><i>${readable_address}.</i></b></p>`;
+      coordsEl.textContent = `Latitude: ${latitude}, Longitude: ${longitude}`;
+      lastSeenEl.innerHTML = `Last seen on <b>${formatFullDateTime(date_time)}</b>.<br><br>Please click the button for a recent update of the location.`;
+
+      scanBtn.style.display = "inline-block";
+    });
+  });
+
+  // Scan button logic (keeps current marker in window.currentMarker so it can be removed)
+  scanBtn.addEventListener("click", async () => {
+    if (!activeChildId) return alert("Please select a child first.");
+    if (!navigator.geolocation) return alert("Geolocation not supported.");
+
+    const originalText = scanBtn.innerHTML;
+    scanBtn.innerHTML = `<span class="loading-spinner"></span> Scanning location...`;
+    scanBtn.disabled = true;
+
+    // remove previous current marker (if any)
+    if (window.currentMarker) {
+      try { map.removeLayer(window.currentMarker); } catch (e) {}
+      window.currentMarker = null;
     }
 
-    scanBtn.innerHTML = originalText;
-    scanBtn.disabled = false;
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+
+      let readable_address = "";
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
+        );
+        const data = await response.json();
+        readable_address = data.display_name || "Unknown location";
+      } catch {
+        readable_address = "Address not found";
+      }
+
+      const now = new Date();
+      const formattedNow = formatFullDateTime(now);
+
+      window.currentMarker = L.marker([lat, lng], {
+        icon: L.icon({
+          iconUrl: "https://maps.gstatic.com/mapfiles/ms2/micons/red-dot.png",
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+          popupAnchor: [0, -30],
+        }),
+      })
+        .addTo(map)
+        .bindPopup(`
+          Child Name: <b>${activeChildName}</b><br>
+          ${readable_address}<br>
+          <i>${formattedNow}</i>
+        `)
+        .openPopup();
+
+      map.setView([lat, lng], 15);
+
+      try {
+        const res = await fetch("/api/locations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            child_id: activeChildId,
+            latitude: lat,
+            longitude: lng,
+            readable_address,
+          }),
+        });
+        const result = await res.json();
+
+        addressEl.innerHTML = `<b>Current location of ${activeChildName}:</b> ${readable_address}`;
+        coordsEl.textContent = `Lat: ${lat}, Lng: ${lng}`;
+        lastSeenEl.innerHTML = `Last updated on <b>${formattedNow}</b>.`;
+        const row = table.querySelector(`tr[data-child-id="${activeChildId}"]`);
+        if (row) row.querySelector(".last-location").textContent = readable_address;
+
+        alert("Child's location acquired successfully.");
+      } catch (err) {
+        console.error(err);
+        alert("Error saving location.");
+      }
+
+      scanBtn.innerHTML = originalText;
+      scanBtn.disabled = false;
+    }, (err) => {
+      alert("Unable to get your location: " + err.message);
+      scanBtn.innerHTML = originalText;
+      scanBtn.disabled = false;
+    });
   });
-});
 
 });

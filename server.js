@@ -95,8 +95,6 @@ app.get("/track-child", (req, res) => res.redirect("/api/parents"));
 
 app.get("/geofence-setup", (req, res) => res.redirect("/api/geofences/setup"));
 
-// app.get("/geofence-view", (req, res) => res.redirect("/api/geofences/view"));
-
 app.get("/geofence-view", (req, res) => {
   if (!req.session.parent) return res.redirect("/login");
 

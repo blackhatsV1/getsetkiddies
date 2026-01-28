@@ -154,3 +154,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+// Auto-select a child if provided from query
+const urlParams = new URLSearchParams(window.location.search);
+const selectedChildId = urlParams.get("child_id");
+
+if (selectedChildId) {
+  const btn = document.querySelector(`.setGeoBtn[data-child-id="${selectedChildId}"]`);
+  if (btn) btn.click();
+}
+

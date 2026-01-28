@@ -98,6 +98,11 @@
       font-size: 13px;
     }
   }
+
+  .geoStatus span {
+  font-weight: 600;
+}
+
 </style>
 
   <%- include('../partials/top-nav-parents') %>
@@ -123,7 +128,8 @@
               <th>Lastname</th>
               <th>Age</th>
               <th>Gender</th>
-              <th>Last Seen Location</th>
+              <th>Last Known Location</th>
+              <th>Geofence Status</th> <!-- 👈 new -->
               <th>Action</th>
             </tr>
           </thead>
@@ -135,6 +141,7 @@
                 <td><%= child.child_age %></td>
                 <td><%= child.child_gender %></td>
                 <td class="last-location">Loading...</td>
+                <td class="geoStatus" data-child-id="<%= child.id %>">Checking...</td>
                 <td>
                   <button class="trackBtn"
                     data-child-id="<%= child.id %>"

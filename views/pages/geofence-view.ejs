@@ -73,6 +73,22 @@
       border-radius: 0;
     }
   }
+
+  .editGeoBtn {
+  background-color: #692e69;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.editGeoBtn:hover {
+  background-color: #8b3c8b;
+}
+
 </style>
 
   <%- include('../partials/top-nav-parents') %>
@@ -91,14 +107,15 @@
 
         <table id="geoTable" border="1" style="width:100%; border-collapse: collapse; margin-top: 20px;">
             <thead>
-                <tr>
+              <tr>
                 <th>Child</th>
                 <th>Geofence Name</th>
                 <th>Radius (m)</th>
                 <th>Status</th>
                 <th>Last Known Location</th>
                 <th>Last Updated</th>
-                </tr>
+                <th>Action</th> <!-- 👈 New column -->
+              </tr>
             </thead>
             <tbody id="geoBody">
                 <% geofences.forEach(g => { %>
@@ -121,6 +138,18 @@
                     <% } %>
                     </td>
                     <td><%= g.date_time ? new Date(g.date_time).toLocaleString('en-PH') : '—' %></td>
+                    <td>
+                      <button 
+                        class="editGeoBtn"
+                        data-child-id="<%= g.child_id %>"
+                        data-child-name="<%= g.firstname %> <%= g.lastname %>"
+                        data-geo-name="<%= g.geofence_name %>"
+                        data-lat="<%= g.fence_lat %>"
+                        data-lng="<%= g.fence_lng %>"
+                        data-radius="<%= g.radius %>">
+                        Edit
+                      </button>
+                    </td>
                 </tr>
                 <% }) %>
             </tbody>
@@ -248,6 +277,17 @@ async function renderGeofences() {
 
 // Run rendering
 renderGeofences();
+
+// Handle Edit Geofence button
+document.querySelectorAll(".editGeoBtn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const childId = btn.dataset.childId;
+
+    // Redirect to the setup page for that specific child
+    window.location.href = `/api/geofences/setup?child_id=${childId}`;
+  });
+});
+
 </script>
 
 </body>
